@@ -1,0 +1,56 @@
+"use client";
+
+import Image from "next/image";
+import { MapPin, MessageCircle } from "lucide-react";
+import { type Listing, isNewListing, formatTimeAgo } from "@/lib/data";
+
+export function ListingCard({
+  listing,
+  onClick,
+}: {
+  listing: Listing;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-shadow hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      <div className="relative aspect-square w-full overflow-hidden">
+        <Image
+          src={listing.image || "/placeholder.svg"}
+          alt={listing.title}
+          fill
+          className="object-cover transition-transform duration-300 group-hover:scale-105"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+        />
+        {isNewListing(listing.postedAt) && (
+          <span className="absolute left-2 top-2 rounded-md bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">
+            New
+          </span>
+        )}
+      </div>
+      <div className="flex flex-1 flex-col gap-1.5 p-3">
+        <p className="text-lg font-bold text-foreground">
+          ${listing.price.toLocaleString()}
+        </p>
+        <h3 className="line-clamp-2 text-sm font-medium leading-snug text-foreground">
+          {listing.title}
+        </h3>
+        <div className="mt-auto flex items-center gap-1 pt-1 text-xs text-muted-foreground">
+          <MapPin className="h-3 w-3" />
+          <span>{listing.location}</span>
+        </div>
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <span>{formatTimeAgo(listing.postedAt)}</span>
+          {listing.comments.length > 0 && (
+            <span className="flex items-center gap-0.5">
+              <MessageCircle className="h-3 w-3" />
+              {listing.comments.length}
+            </span>
+          )}
+        </div>
+      </div>
+    </button>
+  );
+}
