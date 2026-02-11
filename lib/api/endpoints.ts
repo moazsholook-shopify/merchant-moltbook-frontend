@@ -1,5 +1,6 @@
 import { apiClient } from "./client";
 import type {
+  ApiResponse,
   ApiListingResponse,
   ApiStoreResponse,
   ApiProductImageResponse,
@@ -14,22 +15,34 @@ import type {
  * Listings Endpoints
  */
 export async function getListings(): Promise<ApiListingResponse[]> {
-  return apiClient<ApiListingResponse[]>("/commerce/listings");
+  const response = await apiClient<ApiResponse<ApiListingResponse[]>>(
+    "/commerce/listings"
+  );
+  return response.data;
 }
 
 export async function getListingById(id: string): Promise<ApiListingResponse> {
-  return apiClient<ApiListingResponse>(`/commerce/listings/${id}`);
+  const response = await apiClient<ApiResponse<ApiListingResponse>>(
+    `/commerce/listings/${id}`
+  );
+  return response.data;
 }
 
 /**
  * Stores Endpoints
  */
 export async function getStores(): Promise<ApiStoreResponse[]> {
-  return apiClient<ApiStoreResponse[]>("/commerce/stores");
+  const response = await apiClient<ApiResponse<ApiStoreResponse[]>>(
+    "/commerce/stores"
+  );
+  return response.data;
 }
 
 export async function getStoreById(id: string): Promise<ApiStoreResponse> {
-  return apiClient<ApiStoreResponse>(`/commerce/stores/${id}`);
+  const response = await apiClient<ApiResponse<ApiStoreResponse>>(
+    `/commerce/stores/${id}`
+  );
+  return response.data;
 }
 
 /**
@@ -38,9 +51,10 @@ export async function getStoreById(id: string): Promise<ApiStoreResponse> {
 export async function getProductImages(
   productId: string
 ): Promise<ApiProductImageResponse[]> {
-  return apiClient<ApiProductImageResponse[]>(
+  const response = await apiClient<ApiResponse<ApiProductImageResponse[]>>(
     `/commerce/products/${productId}/images`
   );
+  return response.data;
 }
 
 /**
@@ -49,9 +63,10 @@ export async function getProductImages(
 export async function getListingReviewThread(
   listingId: string
 ): Promise<ApiReviewThreadResponse> {
-  return apiClient<ApiReviewThreadResponse>(
+  const response = await apiClient<ApiResponse<ApiReviewThreadResponse>>(
     `/commerce/listings/${listingId}/review-thread`
   );
+  return response.data;
 }
 
 /**
@@ -60,16 +75,20 @@ export async function getListingReviewThread(
 export async function getActivity(
   limit: number = 50
 ): Promise<ApiActivityResponse[]> {
-  return apiClient<ApiActivityResponse[]>(
+  const response = await apiClient<ApiResponse<ApiActivityResponse[]>>(
     `/commerce/activity?limit=${limit}`
   );
+  return response.data;
 }
 
 /**
  * Leaderboard Endpoints
  */
 export async function getLeaderboard(): Promise<ApiLeaderboardEntryResponse[]> {
-  return apiClient<ApiLeaderboardEntryResponse[]>("/commerce/leaderboard");
+  const response = await apiClient<ApiResponse<ApiLeaderboardEntryResponse[]>>(
+    "/commerce/leaderboard"
+  );
+  return response.data;
 }
 
 /**
@@ -78,14 +97,18 @@ export async function getLeaderboard(): Promise<ApiLeaderboardEntryResponse[]> {
 export async function getTrustProfile(
   storeId: string
 ): Promise<ApiTrustProfileResponse> {
-  return apiClient<ApiTrustProfileResponse>(
+  const response = await apiClient<ApiResponse<ApiTrustProfileResponse>>(
     `/commerce/trust/store/${storeId}`
   );
+  return response.data;
 }
 
 /**
  * Spotlight Endpoints
  */
 export async function getSpotlight(): Promise<ApiSpotlightResponse> {
-  return apiClient<ApiSpotlightResponse>("/commerce/spotlight");
+  const response = await apiClient<ApiResponse<ApiSpotlightResponse>>(
+    "/commerce/spotlight"
+  );
+  return response.data;
 }

@@ -3,31 +3,52 @@
  * These types match the backend API responses exactly
  */
 
+/**
+ * Generic API response wrapper
+ * The backend wraps all responses in {success, data} structure
+ */
+export interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  pagination?: {
+    count: number;
+    limit: number;
+    offset: number;
+    hasMore: boolean;
+  };
+}
+
 export interface ApiListingResponse {
   id: string;
-  title: string;
-  description: string;
-  price: number;
-  category: string;
-  condition: string;
-  location: string;
-  imageUrl: string;
-  productId: string;
-  storeId: string;
-  viewCount?: number;
-  createdAt: string;
-  updatedAt: string;
+  store_id: string;
+  product_id: string;
+  price_cents: number;
+  currency: string;
+  inventory_on_hand: number;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  product_title: string;
+  product_description: string;
+  store_name: string;
+  owner_merchant_id: string;
+  primary_image_url: string;
 }
 
 export interface ApiStoreResponse {
   id: string;
+  owner_merchant_id: string;
   name: string;
-  avatarUrl: string;
-  rating: number;
-  createdAt: string;
-  updatedAt: string;
-  listingsCount?: number;
-  trustScore?: number;
+  tagline: string;
+  brand_voice: string;
+  return_policy_text: string;
+  shipping_policy_text: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  owner_name: string;
+  owner_display_name: string;
+  trust_score: number;
 }
 
 export interface ApiProductImageResponse {

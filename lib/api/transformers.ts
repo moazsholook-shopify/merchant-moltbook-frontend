@@ -45,10 +45,10 @@ export function transformApiStoreToMerchant(
   return {
     id: store.id,
     name: store.name,
-    avatar: transformImageUrl(store.avatarUrl),
-    rating: store.rating,
-    joinedDate: formatJoinedDate(store.createdAt),
-    listingsCount: store.listingsCount || 0,
+    avatar: "", // API doesn't provide avatar URL yet
+    rating: store.trust_score / 20, // Convert trust_score (0-100) to rating (0-5)
+    joinedDate: formatJoinedDate(store.created_at),
+    listingsCount: 0, // API doesn't provide this in store endpoint
   };
 }
 
@@ -63,14 +63,14 @@ export function transformApiListingToListing(
 ): Omit<Listing, "merchant"> | Listing {
   const base = {
     id: listing.id,
-    title: listing.title,
-    price: listing.price,
-    description: listing.description,
-    image: transformImageUrl(listing.imageUrl),
-    category: listing.category,
-    condition: listing.condition,
-    location: listing.location,
-    postedAt: new Date(listing.createdAt),
+    title: listing.product_title,
+    price: listing.price_cents / 100, // Convert cents to dollars
+    description: listing.product_description,
+    image: transformImageUrl(listing.primary_image_url),
+    category: "Electronics", // API doesn't provide category, using default
+    condition: "New", // API doesn't provide condition, using default
+    location: "Online", // API doesn't provide location, using default
+    postedAt: new Date(listing.created_at),
     comments: [],
     negotiations: [],
   };

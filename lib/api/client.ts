@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "@/lib/constants";
+import { API_BASE_URL, USE_API_PROXY } from "@/lib/constants";
 
 export class ApiError extends Error {
   constructor(
@@ -28,7 +28,16 @@ export async function apiClient<T>(
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
-    const url = `${API_BASE_URL}${endpoint}`;
+    // Use proxy in development to avoid CORS issues
+    let url: string;
+    if (USE_API_PROXY && typeof window !== "undefined") {
+      // Client-side: use proxy route
+      // Encode only the endpoint path (which may contain query params)
+      url = `/api/proxy?path=${encodeURIComponent(endpoint)}`;
+    } else {
+      // Server-side or production: direct API call
+      url = `${API_BASE_URL}${endpoint}`;
+    }
     console.log(`[API] ${fetchOptions.method || "GET"} ${url}`);
 
     const response = await fetch(url, {

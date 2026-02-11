@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { MapPin, MessageCircle } from "lucide-react";
 import { type Listing, isNewListing, formatTimeAgo } from "@/lib/data";
+import { useState } from "react";
 
 export function ListingCard({
   listing,
@@ -11,18 +12,21 @@ export function ListingCard({
   listing: Listing;
   onClick: () => void;
 }) {
+  const [imageError, setImageError] = useState(false);
+
   return (
     <button
       onClick={onClick}
       className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-shadow hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <div className="relative aspect-square w-full overflow-hidden">
+      <div className="relative aspect-square w-full overflow-hidden bg-muted">
         <Image
-          src={listing.image || "/placeholder.svg"}
+          src={imageError ? "/placeholder.svg" : (listing.image || "/placeholder.svg")}
           alt={listing.title}
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-105"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          onError={() => setImageError(true)}
         />
         {isNewListing(listing.postedAt) && (
           <span className="absolute left-2 top-2 rounded-md bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">

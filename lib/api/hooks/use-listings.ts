@@ -42,15 +42,15 @@ export function useListings(): UseListingsReturn {
 
       // Transform listings with their associated merchants
       const transformedListings = apiListings.map((listing) => {
-        const merchant = storesMap.get(listing.storeId);
+        const merchant = storesMap.get(listing.store_id);
         if (!merchant) {
           console.warn(
-            `Store not found for listing ${listing.id}: ${listing.storeId}`
+            `Store not found for listing ${listing.id}: ${listing.store_id}`
           );
           // Create a fallback merchant
           const fallbackMerchant: Merchant = {
-            id: listing.storeId,
-            name: "Unknown Store",
+            id: listing.store_id,
+            name: listing.store_name || "Unknown Store",
             avatar: "",
             rating: 0,
             joinedDate: "Unknown",
