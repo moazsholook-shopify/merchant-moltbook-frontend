@@ -8,13 +8,20 @@ import {
 } from "@/components/category-sidebar";
 import { ListingCard } from "@/components/listing-card";
 import { ListingDetail } from "@/components/listing-detail";
-import { listings, categories } from "@/lib/data";
+import { ListingGridSkeleton } from "@/components/loading-states";
+import { ErrorDisplay } from "@/components/error-display";
+import { ActivityFeed } from "@/components/activity-feed";
+import { useListings } from "@/lib/api/hooks/use-listings";
+import { categories } from "@/lib/data";
 import type { Listing } from "@/lib/data";
 
 export default function MarketplacePage() {
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
+
+  // Fetch listings from API
+  const { listings, loading, error, refetch } = useListings();
 
   const filteredListings = useMemo(() => {
     return listings.filter((listing) => {
@@ -30,7 +37,7 @@ export default function MarketplacePage() {
           .includes(searchQuery.toLowerCase());
       return matchesCategory && matchesSearch;
     });
-  }, [selectedCategory, searchQuery]);
+  }, [listings, selectedCategory, searchQuery]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -56,7 +63,7 @@ export default function MarketplacePage() {
         </div>
       )}
 
-      <div className="mx-auto flex max-w-7xl gap-6 px-4 py-6">
+      <div className="mx-auto grid max-w-[1600px] gap-6 px-4 py-6 lg:grid-cols-[240px_1fr] xl:grid-cols-[240px_1fr_320px]">
         {/* Desktop sidebar */}
         {!selectedListing && (
           <CategorySidebar
@@ -70,7 +77,7 @@ export default function MarketplacePage() {
         )}
 
         {/* Main content */}
-        <main className="flex-1">
+        <main className={selectedListing ? "lg:col-span-2 xl:col-span-3" : ""}>
           {selectedListing ? (
             <ListingDetail
               listing={selectedListing}
@@ -84,13 +91,19 @@ export default function MarketplacePage() {
                     ? "Today's picks"
                     : selectedCategory}
                 </h1>
-                <p className="text-sm text-muted-foreground">
-                  {filteredListings.length}{" "}
-                  {filteredListings.length === 1 ? "listing" : "listings"}
-                </p>
+                {!loading && !error && (
+                  <p className="text-sm text-muted-foreground">
+                    {filteredListings.length}{" "}
+                    {filteredListings.length === 1 ? "listing" : "listings"}
+                  </p>
+                )}
               </div>
 
-              {filteredListings.length === 0 ? (
+              {loading ? (
+                <ListingGridSkeleton count={8} />
+              ) : error ? (
+                <ErrorDisplay message={error} onRetry={refetch} />
+              ) : filteredListings.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20">
                   <p className="text-lg font-medium text-foreground">
                     No listings found
@@ -100,7 +113,7 @@ export default function MarketplacePage() {
                   </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
                   {filteredListings.map((listing) => (
                     <ListingCard
                       key={listing.id}
@@ -113,6 +126,15 @@ export default function MarketplacePage() {
             </>
           )}
         </main>
+
+        {/* Activity Feed - Desktop only */}
+        {!selectedListing && (
+          <aside className="hidden xl:block">
+            <div className="sticky top-6">
+              <ActivityFeed limit={30} />
+            </div>
+          </aside>
+        )}
       </div>
     </div>
   );
