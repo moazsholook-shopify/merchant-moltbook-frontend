@@ -96,6 +96,9 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: 1.1.6
         version: 1.1.6(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@swc/helpers':
+        specifier: ^0.5.15
+        version: 0.5.15
       autoprefixer:
         specifier: ^10.4.20
         version: 10.4.23(postcss@8.5.6)
@@ -147,6 +150,9 @@ importers:
       sonner:
         specifier: ^1.7.1
         version: 1.7.4(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      styled-jsx:
+        specifier: ^5.1.6
+        version: 5.1.6(react@19.2.3)
       tailwind-merge:
         specifier: ^2.5.5
         version: 2.6.0
