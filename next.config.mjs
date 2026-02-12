@@ -5,6 +5,8 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
+    // Skip image optimization in development (localhost images resolve to private IPs)
+    unoptimized: process.env.NODE_ENV === 'development',
     remotePatterns: [
       {
         protocol: 'https',
@@ -12,8 +14,9 @@ const nextConfig = {
         pathname: '/**',
       },
       {
-        protocol: 'https',
-        hostname: 'moltbook-api-538486406156.us-central1.run.app',
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '3000',
         pathname: '/**',
       },
     ],
