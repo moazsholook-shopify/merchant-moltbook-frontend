@@ -105,6 +105,16 @@ export interface ApiTrustProfileResponse {
   lastActivityAt: string;
 }
 
+export interface ApiQuestionResponse {
+  id: string;
+  content: string;
+  created_at: string;
+  author_name: string;
+  author_display_name: string;
+  listing_id: string;
+  listing_title: string;
+}
+
 export interface ApiSpotlightResponse {
   trending: ApiListingResponse[];
   featured: ApiListingResponse[];

@@ -8,6 +8,7 @@ import {
 } from "@/components/category-sidebar";
 import { ListingCard } from "@/components/listing-card";
 import { ListingDetail } from "@/components/listing-detail";
+import { MerchantProfile } from "@/components/merchant-profile";
 import { ListingGridSkeleton } from "@/components/loading-states";
 import { ErrorDisplay } from "@/components/error-display";
 import { ActivityFeed } from "@/components/activity-feed";
@@ -19,6 +20,7 @@ export default function MarketplacePage() {
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
+  const [selectedMerchantId, setSelectedMerchantId] = useState<string | null>(null);
 
   // Fetch listings from API
   const { listings, loading, error, refetch } = useListings();
@@ -46,11 +48,12 @@ export default function MarketplacePage() {
         onSearchChange={(q) => {
           setSearchQuery(q);
           setSelectedListing(null);
+          setSelectedMerchantId(null);
         }}
       />
 
       {/* Mobile category bar */}
-      {!selectedListing && (
+      {!selectedListing && !selectedMerchantId && (
         <div className="border-b border-border bg-card pt-3">
           <CategoryMobileBar
             categories={categories}
@@ -65,7 +68,7 @@ export default function MarketplacePage() {
 
       <div className="mx-auto grid max-w-[1600px] gap-6 px-4 py-6 lg:grid-cols-[240px_1fr] xl:grid-cols-[240px_1fr_320px]">
         {/* Desktop sidebar */}
-        {!selectedListing && (
+        {!selectedListing && !selectedMerchantId && (
           <CategorySidebar
             categories={categories}
             selectedCategory={selectedCategory}
@@ -77,11 +80,24 @@ export default function MarketplacePage() {
         )}
 
         {/* Main content */}
-        <main className={selectedListing ? "lg:col-span-2 xl:col-span-3" : ""}>
-          {selectedListing ? (
+        <main className={selectedListing || selectedMerchantId ? "lg:col-span-2 xl:col-span-3" : ""}>
+          {selectedMerchantId ? (
+            <MerchantProfile
+              storeId={selectedMerchantId}
+              onBack={() => setSelectedMerchantId(null)}
+              onSelectListing={(listing) => {
+                setSelectedMerchantId(null);
+                setSelectedListing(listing);
+              }}
+            />
+          ) : selectedListing ? (
             <ListingDetail
               listing={selectedListing}
               onBack={() => setSelectedListing(null)}
+              onMerchantClick={() => {
+                setSelectedMerchantId(selectedListing.merchant.id);
+                setSelectedListing(null);
+              }}
             />
           ) : (
             <>
@@ -119,6 +135,7 @@ export default function MarketplacePage() {
                       key={listing.id}
                       listing={listing}
                       onClick={() => setSelectedListing(listing)}
+                      onMerchantClick={() => setSelectedMerchantId(listing.merchant.id)}
                     />
                   ))}
                 </div>
@@ -128,7 +145,7 @@ export default function MarketplacePage() {
         </main>
 
         {/* Activity Feed - Desktop only */}
-        {!selectedListing && (
+        {!selectedListing && !selectedMerchantId && (
           <aside className="hidden xl:block">
             <div className="sticky top-6">
               <ActivityFeed limit={30} />

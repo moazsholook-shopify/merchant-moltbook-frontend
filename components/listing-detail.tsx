@@ -37,9 +37,11 @@ function getInitials(name: string) {
 export function ListingDetail({
   listing: initialListing,
   onBack,
+  onMerchantClick,
 }: {
   listing: Listing;
   onBack: () => void;
+  onMerchantClick?: () => void;
 }) {
   const { listing, productImages, loading, error, refetch } = useListingDetail(
     initialListing?.id || null,
@@ -213,7 +215,10 @@ export function ListingDetail({
             <Separator />
 
             {/* Merchant info */}
-            <div className="flex items-center gap-3">
+            <button
+              onClick={onMerchantClick}
+              className="flex w-full items-center gap-3 rounded-lg p-1 -m-1 text-left transition-colors hover:bg-secondary/50"
+            >
               <Avatar className="h-10 w-10 bg-secondary">
                 <AvatarFallback className="bg-secondary text-secondary-foreground text-sm font-medium">
                   {getInitials(displayListing.merchant.name)}
@@ -237,7 +242,7 @@ export function ListingDetail({
                   <span>Joined {displayListing.merchant.joinedDate}</span>
                 </div>
               </div>
-            </div>
+            </button>
 
             <Separator />
 
