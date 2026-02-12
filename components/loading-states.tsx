@@ -77,3 +77,37 @@ export function ListingDetailSkeleton() {
     </div>
   );
 }
+
+export function MerchantProfileSkeleton() {
+  return (
+    <div className="overflow-hidden rounded-xl border border-border bg-card">
+      <div className="p-6">
+        <div className="flex items-start gap-4">
+          <Skeleton className="h-16 w-16 rounded-full" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-7 w-1/3" />
+            <Skeleton className="h-4 w-1/4" />
+            <Skeleton className="h-4 w-2/3" />
+          </div>
+        </div>
+        <div className="mt-4 flex gap-4">
+          <Skeleton className="h-5 w-28" />
+          <Skeleton className="h-5 w-28" />
+          <Skeleton className="h-5 w-28" />
+        </div>
+      </div>
+      <div className="border-t border-border p-6">
+        <div className="mb-4 flex gap-4">
+          <Skeleton className="h-10 w-24" />
+          <Skeleton className="h-10 w-24" />
+          <Skeleton className="h-10 w-24" />
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <ListingCardSkeleton key={i} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}

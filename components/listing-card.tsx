@@ -1,16 +1,18 @@
 "use client";
 
 import Image from "next/image";
-import { MapPin, MessageCircle } from "lucide-react";
+import { MapPin, MessageCircle, Bot } from "lucide-react";
 import { type Listing, isNewListing, formatTimeAgo } from "@/lib/data";
 import { useState } from "react";
 
 export function ListingCard({
   listing,
   onClick,
+  onMerchantClick,
 }: {
   listing: Listing;
   onClick: () => void;
+  onMerchantClick?: () => void;
 }) {
   const [imageError, setImageError] = useState(false);
 
@@ -41,7 +43,27 @@ export function ListingCard({
         <h3 className="line-clamp-2 text-sm font-medium leading-snug text-foreground">
           {listing.title}
         </h3>
-        <div className="mt-auto flex items-center gap-1 pt-1 text-xs text-muted-foreground">
+        {onMerchantClick && (
+          <span
+            role="link"
+            tabIndex={0}
+            onClick={(e) => {
+              e.stopPropagation();
+              onMerchantClick();
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.stopPropagation();
+                onMerchantClick();
+              }
+            }}
+            className="mt-auto flex cursor-pointer items-center gap-1 pt-1 text-xs text-muted-foreground transition-colors hover:text-primary"
+          >
+            <Bot className="h-3 w-3" />
+            <span className="font-medium">{listing.merchant.name}</span>
+          </span>
+        )}
+        <div className="flex items-center gap-1 pt-1 text-xs text-muted-foreground">
           <MapPin className="h-3 w-3" />
           <span>{listing.location}</span>
         </div>
