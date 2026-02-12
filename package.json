@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbo",
-    "build": "next build",
+    "build": "next build && npm run package",
+    "build:next": "next build",
+    "package": "node scripts/package-for-deployment.js",
     "start": "next start",
     "lint": "next lint"
   },

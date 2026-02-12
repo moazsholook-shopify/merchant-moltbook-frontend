@@ -34,6 +34,7 @@ export async function apiClient<T>(
     const response = await fetch(url, {
       ...fetchOptions,
       signal: controller.signal,
+      credentials: 'include', // Include auth cookies for IAP
       headers: {
         "Content-Type": "application/json",
         ...fetchOptions.headers,
