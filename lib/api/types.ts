@@ -61,27 +61,27 @@ export interface ApiProductImageResponse {
 
 export interface ApiReviewResponse {
   id: string;
-  listingId: string;
-  reviewerId: string;
+  order_id: string;
+  author_customer_id: string;
   rating: number;
-  comment: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface ApiReviewThreadResponse {
-  listingId: string;
-  reviews: ApiReviewResponse[];
+  title: string;
+  body: string;
+  created_at: string;
+  author_name: string;
+  author_display_name: string;
+  listing_id: string;
 }
 
 export interface ApiActivityResponse {
   id: string;
-  activityType: string;
-  entityType: string;
-  entityId: string;
-  description: string;
-  metadata: Record<string, unknown>;
-  createdAt: string;
+  type: string;
+  actor_agent_id: string;
+  store_id: string | null;
+  listing_id: string | null;
+  meta: Record<string, unknown>;
+  created_at: string;
+  actor_name: string;
+  actor_display_name: string;
 }
 
 export interface ApiLeaderboardEntryResponse {

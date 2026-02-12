@@ -22,6 +22,7 @@ import { NegotiationThread } from "@/components/negotiation-thread";
 import { ListingDetailSkeleton } from "@/components/loading-states";
 import { ErrorDisplay } from "@/components/error-display";
 import { useListingDetail } from "@/lib/api/hooks/use-listing-detail";
+import { useListingOffers } from "@/lib/api/hooks/use-listing-offers";
 import { type Listing, formatTimeAgo } from "@/lib/data";
 
 function getInitials(name: string) {
@@ -41,9 +42,12 @@ export function ListingDetail({
   onBack: () => void;
 }) {
   const { listing, productImages, loading, error, refetch } = useListingDetail(
-    initialListing?.id || null
+    initialListing?.id || null,
+    initialListing
   );
+  const { negotiations: offerNegotiations } = useListingOffers(initialListing?.id || null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
 
   // Use fetched data if available, otherwise use initial listing
   const displayListing = listing || initialListing;
@@ -107,12 +111,13 @@ export function ListingDetail({
           <div className="relative w-full md:w-1/2">
             <div className="relative aspect-square w-full">
               <Image
-                src={images[currentImageIndex] || "/placeholder.svg"}
+                src={imageErrors.has(currentImageIndex) ? "/placeholder.svg" : (images[currentImageIndex] || "/placeholder.svg")}
                 alt={displayListing.title}
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 50vw"
                 priority
+                onError={() => setImageErrors((prev) => new Set(prev).add(currentImageIndex))}
               />
               {images.length > 1 && (
                 <>
@@ -161,11 +166,12 @@ export function ListingDetail({
                     }`}
                   >
                     <Image
-                      src={img || "/placeholder.svg"}
+                      src={imageErrors.has(idx) ? "/placeholder.svg" : (img || "/placeholder.svg")}
                       alt={`${displayListing.title} ${idx + 1}`}
                       fill
                       className="object-cover"
                       sizes="64px"
+                      onError={() => setImageErrors((prev) => new Set(prev).add(idx))}
                     />
                   </button>
                 ))}
@@ -248,7 +254,7 @@ export function ListingDetail({
 
         <Separator />
 
-        {/* Tabs: Comments + Negotiations */}
+        {/* Tabs: Comments + Offers */}
         <div className="p-6">
           <Tabs defaultValue="comments">
             <TabsList className="mb-4">
@@ -256,12 +262,10 @@ export function ListingDetail({
                 <MessageSquare className="mr-1.5 h-3 w-3" />
                 Comments ({displayListing.comments.length})
               </TabsTrigger>
-              {displayListing.negotiations.length > 0 && (
-                <TabsTrigger value="negotiations">
-                  <Lock className="mr-1.5 h-3 w-3" />
-                  Negotiations ({displayListing.negotiations.length})
-                </TabsTrigger>
-              )}
+              <TabsTrigger value="negotiations">
+                <Lock className="mr-1.5 h-3 w-3" />
+                Offers ({offerNegotiations.length})
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="comments">
@@ -305,36 +309,33 @@ export function ListingDetail({
               </div>
             </TabsContent>
 
-            {displayListing.negotiations.length > 0 && (
-              <TabsContent value="negotiations">
-                <div className="flex flex-col gap-4">
-                  <div className="flex items-center gap-2 rounded-lg bg-muted px-3 py-2">
-                    <Lock className="h-3.5 w-3.5 text-muted-foreground" />
-                    <p className="text-xs text-muted-foreground">
-                      These are private negotiations between AI agents. You are
-                      viewing as a read-only observer.
+            <TabsContent value="negotiations">
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-2 rounded-lg bg-muted px-3 py-2">
+                  <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+                  <p className="text-xs text-muted-foreground">
+                    Offer activity derived from the public feed. Offer amounts are private between agents.
+                  </p>
+                </div>
+
+                {offerNegotiations.length === 0 && (
+                  <div className="flex flex-col items-center gap-2 py-8 text-center">
+                    <Lock className="h-8 w-8 text-muted-foreground/40" />
+                    <p className="text-sm text-muted-foreground">
+                      No offers have been made on this listing yet.
                     </p>
                   </div>
+                )}
 
-                  {displayListing.negotiations.length === 0 && (
-                    <div className="flex flex-col items-center gap-2 py-8 text-center">
-                      <Lock className="h-8 w-8 text-muted-foreground/40" />
-                      <p className="text-sm text-muted-foreground">
-                        No negotiations have been started on this listing yet.
-                      </p>
-                    </div>
-                  )}
-
-                  {displayListing.negotiations.map((neg) => (
-                    <NegotiationThread
-                      key={neg.id}
-                      negotiation={neg}
-                      merchantName={displayListing.merchant.name}
-                    />
-                  ))}
-                </div>
-              </TabsContent>
-            )}
+                {offerNegotiations.map((neg) => (
+                  <NegotiationThread
+                    key={neg.id}
+                    negotiation={neg}
+                    merchantName={displayListing.merchant.name}
+                  />
+                ))}
+              </div>
+            </TabsContent>
           </Tabs>
         </div>
       </div>

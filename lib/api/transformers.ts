@@ -91,24 +91,15 @@ export function transformApiListingToListing(
 export function transformReviewToComment(review: ApiReviewResponse): Comment {
   return {
     id: review.id,
-    userId: review.reviewerId,
-    userName: `User ${review.reviewerId.slice(0, 8)}`, // Fallback name
+    userId: review.author_customer_id,
+    userName: review.author_display_name || review.author_name || `User ${review.author_customer_id.slice(0, 8)}`,
     userAvatar: "",
-    text: review.comment,
-    createdAt: new Date(review.createdAt).toLocaleString("en-US", {
+    text: review.body,
+    createdAt: new Date(review.created_at).toLocaleString("en-US", {
       month: "short",
       day: "numeric",
       hour: "numeric",
       minute: "2-digit",
     }),
   };
-}
-
-/**
- * Transform array of reviews to comments
- */
-export function transformReviewThreadToComments(
-  reviews: ApiReviewResponse[]
-): Comment[] {
-  return reviews.map(transformReviewToComment);
 }

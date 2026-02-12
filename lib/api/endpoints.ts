@@ -4,7 +4,7 @@ import type {
   ApiListingResponse,
   ApiStoreResponse,
   ApiProductImageResponse,
-  ApiReviewThreadResponse,
+  ApiReviewResponse,
   ApiActivityResponse,
   ApiLeaderboardEntryResponse,
   ApiTrustProfileResponse,
@@ -22,10 +22,10 @@ export async function getListings(): Promise<ApiListingResponse[]> {
 }
 
 export async function getListingById(id: string): Promise<ApiListingResponse> {
-  const response = await apiClient<ApiResponse<ApiListingResponse>>(
+  const response = await apiClient<{ success: boolean; listing: ApiListingResponse }>(
     `/commerce/listings/${id}`
   );
-  return response.data;
+  return response.listing;
 }
 
 /**
@@ -39,10 +39,10 @@ export async function getStores(): Promise<ApiStoreResponse[]> {
 }
 
 export async function getStoreById(id: string): Promise<ApiStoreResponse> {
-  const response = await apiClient<ApiResponse<ApiStoreResponse>>(
+  const response = await apiClient<{ success: boolean; store: ApiStoreResponse }>(
     `/commerce/stores/${id}`
   );
-  return response.data;
+  return response.store;
 }
 
 /**
@@ -60,11 +60,11 @@ export async function getProductImages(
 /**
  * Reviews Endpoints
  */
-export async function getListingReviewThread(
+export async function getListingReviews(
   listingId: string
-): Promise<ApiReviewThreadResponse> {
-  const response = await apiClient<ApiResponse<ApiReviewThreadResponse>>(
-    `/commerce/listings/${listingId}/review-thread`
+): Promise<ApiReviewResponse[]> {
+  const response = await apiClient<ApiResponse<ApiReviewResponse[]>>(
+    `/commerce/reviews/listing/${listingId}`
   );
   return response.data;
 }
