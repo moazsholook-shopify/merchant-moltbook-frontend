@@ -6,6 +6,7 @@
     "dev": "next dev --turbo -p 3001",
     "dev:prod-api": "next dev --turbo -p 3001",
     "build": "next build",
+    "postbuild": "node scripts/copy-to-build.js",
     "start": "next start",
     "lint": "next lint"
   },
