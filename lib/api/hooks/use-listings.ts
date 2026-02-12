@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { getListings, getStores } from "../endpoints";
 import {
   transformApiListingToListing,
   transformApiStoreToMerchant,
 } from "../transformers";
+import { LISTINGS_POLL_INTERVAL } from "@/lib/constants";
 import type { Listing, Merchant } from "@/lib/data";
 
 interface UseListingsReturn {
@@ -15,17 +16,41 @@ interface UseListingsReturn {
   refetch: () => Promise<void>;
 }
 
+// Cache image validation results so each URL is only checked once
+const imageValidationCache = new Map<string, boolean>();
+
+async function isImageValid(url: string): Promise<boolean> {
+  if (!url) return false;
+  if (imageValidationCache.has(url)) return imageValidationCache.get(url)!;
+  try {
+    const res = await fetch(`/api/check-image?url=${encodeURIComponent(url)}`);
+    const { valid } = await res.json();
+    imageValidationCache.set(url, valid);
+    return valid;
+  } catch {
+    imageValidationCache.set(url, false);
+    return false;
+  }
+}
+
 /**
  * Hook to fetch and manage listings data from the API
+ * Polls for new listings and pauses when tab is hidden
  */
 export function useListings(): UseListingsReturn {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isVisibleRef = useRef(true);
+  const hasFetchedRef = useRef(false);
 
   const fetchListings = useCallback(async () => {
     try {
-      setLoading(true);
+      // Only show loading spinner on initial fetch
+      if (!hasFetchedRef.current) {
+        setLoading(true);
+      }
       setError(null);
 
       // Fetch listings and stores in parallel
@@ -61,7 +86,14 @@ export function useListings(): UseListingsReturn {
         return transformApiListingToListing(listing, merchant) as Listing;
       });
 
-      setListings(transformedListings);
+      // Filter out listings whose images 404
+      const validationResults = await Promise.all(
+        transformedListings.map((listing) => isImageValid(listing.image))
+      );
+      const validListings = transformedListings.filter((_, i) => validationResults[i]);
+
+      setListings(validListings);
+      hasFetchedRef.current = true;
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to fetch listings";
@@ -72,8 +104,42 @@ export function useListings(): UseListingsReturn {
     }
   }, []);
 
+  // Handle visibility change to pause/resume polling
   useEffect(() => {
+    const handleVisibilityChange = () => {
+      isVisibleRef.current = document.visibilityState === "visible";
+
+      // If tab becomes visible, fetch immediately
+      if (isVisibleRef.current) {
+        fetchListings();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [fetchListings]);
+
+  // Setup polling
+  useEffect(() => {
+    // Initial fetch
     fetchListings();
+
+    // Setup polling interval
+    pollingIntervalRef.current = setInterval(() => {
+      // Only poll if tab is visible
+      if (isVisibleRef.current) {
+        fetchListings();
+      }
+    }, LISTINGS_POLL_INTERVAL);
+
+    // Cleanup
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+    };
   }, [fetchListings]);
 
   return {

@@ -5,12 +5,12 @@ import {
   getListingById,
   getStoreById,
   getProductImages,
-  getListingReviewThread,
+  getListingReviews,
 } from "../endpoints";
 import {
   transformApiListingToListing,
   transformApiStoreToMerchant,
-  transformReviewThreadToComments,
+  transformReviewToComment,
   transformImageUrl,
 } from "../transformers";
 import type { Listing } from "@/lib/data";
@@ -26,7 +26,7 @@ interface UseListingDetailReturn {
 /**
  * Hook to fetch detailed listing data including merchant, images, and reviews
  */
-export function useListingDetail(listingId: string | null): UseListingDetailReturn {
+export function useListingDetail(listingId: string | null, initialListing?: Listing | null): UseListingDetailReturn {
   const [listing, setListing] = useState<Listing | null>(null);
   const [productImages, setProductImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,35 +48,36 @@ export function useListingDetail(listingId: string | null): UseListingDetailRetu
       const apiListing = await getListingById(listingId);
 
       // Fetch store data
-      const apiStore = await getStoreById(apiListing.storeId);
+      const apiStore = await getStoreById(apiListing.store_id);
       const merchant = transformApiStoreToMerchant(apiStore);
 
       // Fetch product images (optional - may fail if no images)
       let images: string[] = [];
       try {
-        const apiImages = await getProductImages(apiListing.productId);
+        const apiImages = await getProductImages(apiListing.product_id);
         images = apiImages
           .sort((a, b) => a.displayOrder - b.displayOrder)
           .map((img) => transformImageUrl(img.imageUrl));
       } catch (imgError) {
         console.warn("Failed to fetch product images:", imgError);
         // Use listing image as fallback
-        images = [transformImageUrl(apiListing.imageUrl)];
+        images = [transformImageUrl(apiListing.primary_image_url)];
       }
 
-      // Fetch review thread (optional - may fail if no reviews)
+      // Fetch reviews (optional - may fail if no reviews)
       let comments: Listing["comments"] = [];
       try {
-        const reviewThread = await getListingReviewThread(listingId);
-        comments = transformReviewThreadToComments(reviewThread.reviews);
+        const reviews = await getListingReviews(listingId);
+        comments = reviews.map(transformReviewToComment);
       } catch (reviewError) {
         console.warn("Failed to fetch reviews:", reviewError);
       }
 
-      // Transform listing
+      // Transform listing — negotiations are handled by useListingOffers hook
       const transformedListing = {
         ...(transformApiListingToListing(apiListing, merchant) as Listing),
         comments,
+        negotiations: [],
       };
 
       setListing(transformedListing);

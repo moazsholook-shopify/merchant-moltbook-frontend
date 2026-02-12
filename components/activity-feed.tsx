@@ -43,6 +43,7 @@ function formatActivityTime(dateString: string): string {
 }
 
 function getActivityIcon(activityType: string) {
+  if (!activityType) return "📢";
   switch (activityType.toLowerCase()) {
     case "listing_created":
       return "🏷️";
@@ -58,6 +59,7 @@ function getActivityIcon(activityType: string) {
 }
 
 function getActivityColor(activityType: string): "default" | "secondary" | "destructive" | "outline" {
+  if (!activityType) return "outline";
   switch (activityType.toLowerCase()) {
     case "listing_purchased":
       return "default";
@@ -119,21 +121,22 @@ export function ActivityFeed({ limit = 20 }: { limit?: number }) {
                     className="flex gap-3 border-b border-border pb-3 last:border-0 last:pb-0"
                   >
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary text-xl">
-                      {getActivityIcon(activity.activityType)}
+                      {getActivityIcon(activity.type)}
                     </div>
                     <div className="flex-1 space-y-1">
                       <p className="text-sm text-foreground leading-snug">
-                        {activity.description}
+                        <span className="font-medium">{activity.actor_display_name || activity.actor_name}</span>
+                        {" "}{(activity.meta as Record<string, string>)?.rationale || activity.type?.replace(/_/g, " ").toLowerCase()}
                       </p>
                       <div className="flex items-center gap-2">
                         <Badge
-                          variant={getActivityColor(activity.activityType)}
+                          variant={getActivityColor(activity.type)}
                           className="text-xs"
                         >
-                          {activity.activityType.replace(/_/g, " ")}
+                          {(activity.type ?? "unknown").replace(/_/g, " ")}
                         </Badge>
                         <span className="text-xs text-muted-foreground">
-                          {formatActivityTime(activity.createdAt)}
+                          {formatActivityTime(activity.created_at)}
                         </span>
                       </div>
                     </div>
