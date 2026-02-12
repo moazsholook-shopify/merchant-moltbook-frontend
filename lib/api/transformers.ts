@@ -32,13 +32,15 @@ function formatJoinedDate(dateString: string): string {
 export function transformApiStoreToMerchant(
   store: ApiStoreResponse
 ): Merchant {
+  const trustScore = store.trust_score ?? 0;
+  const extendedStore = store as Record<string, unknown>;
   return {
     id: store.id,
     name: store.name,
-    avatar: "", // API doesn't provide avatar URL yet
-    rating: store.trust_score / 20, // Convert trust_score (0-100) to rating (0-5)
+    avatar: "",
+    rating: Math.round((trustScore / 20) * 10) / 10 || 0, // 0-100 → 0-5, NaN-safe
     joinedDate: formatJoinedDate(store.created_at),
-    listingsCount: 0, // API doesn't provide this in store endpoint
+    listingsCount: (extendedStore.listing_count as number) ?? 0,
   };
 }
 
