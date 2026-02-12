@@ -9,7 +9,12 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'moltbook-api-production.up.railway.app',
+        hostname: 'moltbook-api-538486406156.us-central1.run.app',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'storage.googleapis.com',
         pathname: '/**',
       },
     ],

@@ -54,10 +54,11 @@ export function useListings(): UseListingsReturn {
       setError(null);
 
       // Fetch listings and stores in parallel
-      const [apiListings, apiStores] = await Promise.all([
+      const [listingsResponse, apiStores] = await Promise.all([
         getListings(),
         getStores(),
       ]);
+      const apiListings = listingsResponse.data;
 
       // Create a map of stores by ID for quick lookup
       const storesMap = new Map<string, Merchant>();

@@ -109,3 +109,121 @@ export interface ApiSpotlightResponse {
   trending: ApiListingResponse[];
   featured: ApiListingResponse[];
 }
+
+/**
+ * Health check response
+ */
+export interface ApiHealthResponse {
+  status: string;
+  timestamp?: string;
+  version?: string;
+}
+
+export interface ApiDeepHealthResponse {
+  status: string;
+  timestamp?: string;
+  version?: string;
+  services?: {
+    database?: { status: string; latency_ms?: number };
+    cache?: { status: string; latency_ms?: number };
+    [key: string]: { status: string; latency_ms?: number } | undefined;
+  };
+}
+
+/**
+ * Product detail response
+ */
+export interface ApiProductResponse {
+  id: string;
+  store_id: string;
+  title: string;
+  description: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Trust events response
+ */
+export interface ApiTrustEventResponse {
+  id: string;
+  store_id: string;
+  event_type: string;
+  delta: number;
+  reason: string;
+  created_at: string;
+}
+
+/**
+ * Review thread response (may include nested replies)
+ */
+export interface ApiReviewThreadResponse {
+  id: string;
+  listing_id: string;
+  reviews: ApiReviewResponse[];
+  total_count: number;
+}
+
+/**
+ * Posts / Threads response (requires agent auth)
+ */
+export interface ApiPostResponse {
+  id: string;
+  submolt: string;
+  author_agent_id: string;
+  author_name: string;
+  author_display_name: string;
+  title: string;
+  body: string;
+  created_at: string;
+  updated_at: string;
+  comment_count: number;
+  upvotes: number;
+  downvotes: number;
+}
+
+export interface ApiPostCommentResponse {
+  id: string;
+  post_id: string;
+  author_agent_id: string;
+  author_name: string;
+  author_display_name: string;
+  body: string;
+  created_at: string;
+  parent_comment_id: string | null;
+}
+
+/**
+ * Search response (requires agent auth)
+ */
+export interface ApiSearchResultResponse {
+  type: "listing" | "store" | "product" | "post";
+  id: string;
+  title: string;
+  description?: string;
+  image_url?: string;
+  score: number;
+}
+
+export interface ApiSearchResponse {
+  query: string;
+  results: ApiSearchResultResponse[];
+  total_count: number;
+}
+
+/**
+ * Pagination parameters
+ */
+export interface PaginationParams {
+  limit?: number;
+  offset?: number;
+}
+
+/**
+ * Activity filter parameters
+ */
+export interface ActivityFilterParams extends PaginationParams {
+  storeId?: string;
+  type?: string;
+}
