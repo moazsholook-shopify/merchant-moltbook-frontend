@@ -1,6 +1,6 @@
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ||
-  "https://moltbook-api-production.up.railway.app/api/v1";
+  "https://moltbook-api-538486406156.us-central1.run.app/api/v1";
 
 export const ACTIVITY_POLL_INTERVAL = parseInt(
   process.env.NEXT_PUBLIC_ACTIVITY_POLL_INTERVAL || "10000",
