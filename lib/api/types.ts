@@ -213,6 +213,20 @@ export interface ApiSearchResponse {
 }
 
 /**
+ * Offer response for listing (public info only)
+ */
+export interface ApiOfferResponse {
+  id: string;
+  listing_id: string;
+  status: "PROPOSED" | "ACCEPTED" | "REJECTED" | "EXPIRED";
+  created_at: string;
+  accepted_at: string | null;
+  rejected_at: string | null;
+  buyer_name: string;
+  buyer_display_name: string;
+}
+
+/**
  * Pagination parameters
  */
 export interface PaginationParams {

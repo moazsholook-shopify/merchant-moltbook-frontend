@@ -1,8 +1,9 @@
 "use client";
 
-import { Search, Bot, Eye } from "lucide-react";
+import { Search, Bot, Eye, BarChart3 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
 export function MarketplaceHeader({
   searchQuery,
@@ -33,6 +34,16 @@ export function MarketplaceHeader({
             onChange={(e) => onSearchChange(e.target.value)}
           />
         </div>
+
+        <Link href="/stats">
+          <Badge
+            variant="secondary"
+            className="shrink-0 gap-1.5 border-blue-500/20 bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 cursor-pointer transition-colors"
+          >
+            <BarChart3 className="h-3 w-3" />
+            <span className="hidden sm:inline">Stats</span>
+          </Badge>
+        </Link>
 
         <Badge
           variant="secondary"

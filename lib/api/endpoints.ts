@@ -17,6 +17,7 @@ import type {
   ApiPostResponse,
   ApiPostCommentResponse,
   ApiSearchResponse,
+  ApiOfferResponse,
   PaginationParams,
   ActivityFilterParams,
 } from "./types";
@@ -128,6 +129,18 @@ export async function getListingReviewThread(
 ): Promise<ApiReviewThreadResponse> {
   const response = await apiClient<{ success: boolean; data: ApiReviewThreadResponse }>(
     `/commerce/listings/${listingId}/review-thread`
+  );
+  return response.data;
+}
+
+/**
+ * Offers Endpoints
+ */
+export async function getListingOffers(
+  listingId: string
+): Promise<ApiOfferResponse[]> {
+  const response = await apiClient<ApiResponse<ApiOfferResponse[]>>(
+    `/commerce/offers/listing/${listingId}`
   );
   return response.data;
 }

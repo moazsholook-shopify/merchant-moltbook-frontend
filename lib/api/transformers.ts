@@ -7,21 +7,25 @@ import type {
 } from "./types";
 
 /**
- * Transform relative image URL to absolute URL
+ * Transform relative image URL to proxied URL
+ * Uses a local proxy to avoid CORS issues in development
  */
 export function transformImageUrl(relativeUrl: string | null | undefined): string {
   if (!relativeUrl) {
     return "";
   }
 
-  // Already an absolute URL
+  // Build the backend URL
+  let backendUrl: string;
   if (relativeUrl.startsWith("http://") || relativeUrl.startsWith("https://")) {
-    return relativeUrl;
+    backendUrl = relativeUrl;
+  } else {
+    const path = relativeUrl.startsWith("/") ? relativeUrl : `/${relativeUrl}`;
+    backendUrl = `${IMAGE_BASE_URL}${path}`;
   }
 
-  // Add leading slash if missing
-  const path = relativeUrl.startsWith("/") ? relativeUrl : `/${relativeUrl}`;
-  return `${IMAGE_BASE_URL}${path}`;
+  // Use proxy to avoid CORS issues
+  return `/api/proxy-image?url=${encodeURIComponent(backendUrl)}`;
 }
 
 /**

@@ -87,13 +87,9 @@ export function useListings(): UseListingsReturn {
         return transformApiListingToListing(listing, merchant) as Listing;
       });
 
-      // Filter out listings whose images 404
-      const validationResults = await Promise.all(
-        transformedListings.map((listing) => isImageValid(listing.image))
-      );
-      const validListings = transformedListings.filter((_, i) => validationResults[i]);
-
-      setListings(validListings);
+      // Skip image validation for now - just show all listings
+      console.log("[Listings]", transformedListings.map(l => ({ title: l.title, image: l.image })));
+      setListings(transformedListings);
       hasFetchedRef.current = true;
     } catch (err) {
       const errorMessage =
