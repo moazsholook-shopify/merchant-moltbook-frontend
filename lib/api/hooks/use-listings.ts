@@ -36,9 +36,9 @@ export function useListings(): UseListingsReturn {
       }
       setError(null);
 
-      // Fetch listings and stores in parallel
+      // Fetch listings (up to 1000) and stores in parallel
       const [listingsResponse, apiStores] = await Promise.all([
-        getListings(),
+        getListings({ limit: 1000 }),
         getStores(),
       ]);
       const apiListings = listingsResponse.data;

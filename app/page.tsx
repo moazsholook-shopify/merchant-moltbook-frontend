@@ -21,6 +21,8 @@ export default function MarketplacePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [selectedMerchantId, setSelectedMerchantId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 30;
 
   // Fetch listings from API
   const { listings, loading, error, refetch } = useListings();
@@ -54,6 +56,20 @@ export default function MarketplacePage() {
     });
   }, [listings, selectedStore, searchQuery]);
 
+  // Pagination
+  const totalPages = Math.ceil(filteredListings.length / ITEMS_PER_PAGE);
+  const paginatedListings = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredListings.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredListings, currentPage]);
+
+  // Reset page when filter changes
+  const handleStoreChange = (id: string) => {
+    setSelectedStore(id);
+    setCurrentPage(1);
+    setSelectedListing(null);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <MarketplaceHeader
@@ -71,10 +87,7 @@ export default function MarketplacePage() {
           <CategoryMobileBar
             categories={storeFilters}
             selectedCategory={selectedStore}
-            onSelectCategory={(id) => {
-              setSelectedStore(id);
-              setSelectedListing(null);
-            }}
+            onSelectCategory={handleStoreChange}
           />
         </div>
       )}
@@ -85,10 +98,7 @@ export default function MarketplacePage() {
           <CategorySidebar
             categories={storeFilters}
             selectedCategory={selectedStore}
-            onSelectCategory={(id) => {
-              setSelectedStore(id);
-              setSelectedListing(null);
-            }}
+            onSelectCategory={handleStoreChange}
           />
         )}
 
@@ -142,16 +152,65 @@ export default function MarketplacePage() {
                   </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-                  {filteredListings.map((listing) => (
-                    <ListingCard
-                      key={listing.id}
-                      listing={listing}
-                      onClick={() => setSelectedListing(listing)}
-                      onMerchantClick={() => setSelectedMerchantId(listing.merchant.id)}
-                    />
-                  ))}
-                </div>
+                <>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                    {paginatedListings.map((listing) => (
+                      <ListingCard
+                        key={listing.id}
+                        listing={listing}
+                        onClick={() => setSelectedListing(listing)}
+                        onMerchantClick={() => setSelectedMerchantId(listing.merchant.id)}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Pagination */}
+                  {totalPages > 1 && (
+                    <div className="mt-6 flex items-center justify-center gap-2">
+                      <button
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        disabled={currentPage === 1}
+                        className="rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:bg-secondary text-foreground"
+                      >
+                        Previous
+                      </button>
+
+                      {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                        let page: number;
+                        if (totalPages <= 7) {
+                          page = i + 1;
+                        } else if (currentPage <= 4) {
+                          page = i + 1;
+                        } else if (currentPage >= totalPages - 3) {
+                          page = totalPages - 6 + i;
+                        } else {
+                          page = currentPage - 3 + i;
+                        }
+                        return (
+                          <button
+                            key={page}
+                            onClick={() => setCurrentPage(page)}
+                            className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                              currentPage === page
+                                ? "bg-primary text-primary-foreground"
+                                : "hover:bg-secondary text-foreground"
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        );
+                      })}
+
+                      <button
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        disabled={currentPage === totalPages}
+                        className="rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:bg-secondary text-foreground"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </>
           )}
