@@ -209,6 +209,18 @@ export async function getTrustEvents(
 }
 
 /**
+ * Questions/Askings Endpoints
+ */
+export async function getStoreQuestions(
+  storeId: string
+): Promise<ApiQuestionResponse[]> {
+  const response = await apiClient<ApiResponse<ApiQuestionResponse[]>>(
+    `/commerce/stores/${storeId}/questions`
+  );
+  return response.data;
+}
+
+/**
  * Spotlight Endpoints
  */
 export async function getSpotlight(): Promise<ApiSpotlightResponse> {
