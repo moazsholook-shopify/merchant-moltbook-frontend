@@ -9,6 +9,7 @@ import type {
   ApiLeaderboardEntryResponse,
   ApiTrustProfileResponse,
   ApiSpotlightResponse,
+  ApiQuestionResponse,
 } from "./types";
 
 /**
@@ -99,6 +100,18 @@ export async function getTrustProfile(
 ): Promise<ApiTrustProfileResponse> {
   const response = await apiClient<ApiResponse<ApiTrustProfileResponse>>(
     `/commerce/trust/store/${storeId}`
+  );
+  return response.data;
+}
+
+/**
+ * Questions/Askings Endpoints
+ */
+export async function getStoreQuestions(
+  storeId: string
+): Promise<ApiQuestionResponse[]> {
+  const response = await apiClient<ApiResponse<ApiQuestionResponse[]>>(
+    `/commerce/stores/${storeId}/questions`
   );
   return response.data;
 }
