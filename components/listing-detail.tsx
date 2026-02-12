@@ -23,6 +23,9 @@ import { ErrorDisplay } from "@/components/error-display";
 import { useListingDetail } from "@/lib/api/hooks/use-listing-detail";
 import { useListingOffers } from "@/lib/api/hooks/use-listing-offers";
 import { type Listing, formatTimeAgo } from "@/lib/data";
+import { useEffect, useState as useStateHook } from "react";
+import { getListingReviewThread, getPostComments } from "@/lib/api/endpoints";
+import type { ApiPostCommentResponse } from "@/lib/api/types";
 
 function getInitials(name: string) {
   return name
@@ -49,6 +52,24 @@ export function ListingDetail({
   const { negotiations: offerNegotiations } = useListingOffers(initialListing?.id || null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
+
+  // Fetch thread discussion (LAUNCH_DROP thread comments)
+  const [threadComments, setThreadComments] = useStateHook<ApiPostCommentResponse[]>([]);
+  useEffect(() => {
+    if (!initialListing?.id) return;
+    (async () => {
+      try {
+        const threadResp = await getListingReviewThread(initialListing.id);
+        const threadData = threadResp as unknown as { thread?: { id: string } };
+        if (threadData?.thread?.id) {
+          const comments = await getPostComments(threadData.thread.id);
+          setThreadComments(Array.isArray(comments) ? comments : []);
+        }
+      } catch {
+        // Thread may not exist yet
+      }
+    })();
+  }, [initialListing?.id]);
 
   // Use fetched data if available, otherwise use initial listing
   const displayListing = listing || initialListing;
@@ -255,11 +276,15 @@ export function ListingDetail({
 
         {/* Tabs: Comments + Offers */}
         <div className="p-6">
-          <Tabs defaultValue="comments">
+          <Tabs defaultValue="reviews">
             <TabsList className="mb-4">
-              <TabsTrigger value="comments">
+              <TabsTrigger value="reviews">
+                <Star className="mr-1.5 h-3 w-3" />
+                Reviews ({displayListing.comments.length})
+              </TabsTrigger>
+              <TabsTrigger value="discussion">
                 <MessageSquare className="mr-1.5 h-3 w-3" />
-                Comments ({displayListing.comments.length})
+                Discussion ({threadComments.length})
               </TabsTrigger>
               <TabsTrigger value="negotiations">
                 <Lock className="mr-1.5 h-3 w-3" />
@@ -267,13 +292,13 @@ export function ListingDetail({
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="comments">
+            <TabsContent value="reviews">
               <div className="flex flex-col gap-4">
                 {displayListing.comments.length === 0 && (
                   <div className="flex flex-col items-center gap-2 py-8 text-center">
-                    <MessageSquare className="h-8 w-8 text-muted-foreground/40" />
+                    <Star className="h-8 w-8 text-muted-foreground/40" />
                     <p className="text-sm text-muted-foreground">
-                      No reviews or comments on this listing yet.
+                      No reviews on this listing yet.
                     </p>
                   </div>
                 )}
@@ -286,21 +311,70 @@ export function ListingDetail({
                     </Avatar>
                     <div className="flex-1">
                       <div className="rounded-xl bg-secondary px-3 py-2">
-                        <p className="text-sm font-semibold text-foreground">
-                          {comment.userName}
-                          {comment.userId === displayListing.merchant.id && (
-                            <span className="ml-1.5 rounded bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">
-                              Seller
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-semibold text-foreground">
+                            {comment.userName}
+                            {comment.userId === displayListing.merchant.id && (
+                              <span className="ml-1.5 rounded bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">
+                                Seller
+                              </span>
+                            )}
+                            <Bot className="ml-1 inline h-3 w-3 text-primary" />
+                          </p>
+                          {comment.rating && (
+                            <span className="flex items-center gap-0.5 text-xs">
+                              {Array.from({ length: 5 }, (_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`h-3 w-3 ${i < comment.rating! ? "fill-current text-yellow-500" : "text-muted-foreground/30"}`}
+                                />
+                              ))}
+                              <span className="ml-1 text-muted-foreground">{comment.rating}/5</span>
                             </span>
                           )}
-                          <Bot className="ml-1 inline h-3 w-3 text-primary" />
-                        </p>
+                        </div>
                         <p className="mt-0.5 text-sm text-foreground">
                           {comment.text}
                         </p>
                       </div>
                       <p className="mt-1 px-3 text-xs text-muted-foreground">
                         {comment.createdAt}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="discussion">
+              <div className="flex flex-col gap-4">
+                {threadComments.length === 0 && (
+                  <div className="flex flex-col items-center gap-2 py-8 text-center">
+                    <MessageSquare className="h-8 w-8 text-muted-foreground/40" />
+                    <p className="text-sm text-muted-foreground">
+                      No discussion on this listing yet.
+                    </p>
+                  </div>
+                )}
+                {threadComments.map((tc) => (
+                  <div key={tc.id} className="flex gap-3">
+                    <Avatar className="h-8 w-8 shrink-0 bg-secondary">
+                      <AvatarFallback className="bg-secondary text-secondary-foreground text-xs font-medium">
+                        {getInitials(tc.author_display_name || tc.author_name || "?")}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="rounded-xl bg-secondary px-3 py-2">
+                        <p className="text-sm font-semibold text-foreground">
+                          {tc.author_display_name || tc.author_name}
+                          <Bot className="ml-1 inline h-3 w-3 text-primary" />
+                        </p>
+                        <p className="mt-0.5 text-sm text-foreground">
+                          {tc.body}
+                        </p>
+                      </div>
+                      <p className="mt-1 px-3 text-xs text-muted-foreground">
+                        {new Date(tc.created_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
                       </p>
                     </div>
                   </div>

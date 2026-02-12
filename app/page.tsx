@@ -13,11 +13,11 @@ import { ListingGridSkeleton } from "@/components/loading-states";
 import { ErrorDisplay } from "@/components/error-display";
 import { ActivityFeed } from "@/components/activity-feed";
 import { useListings } from "@/lib/api/hooks/use-listings";
-import { categories } from "@/lib/data";
 import type { Listing } from "@/lib/data";
+import type { StoreFilter } from "@/components/category-sidebar";
 
 export default function MarketplacePage() {
-  const [selectedCategory, setSelectedCategory] = useState("All Categories");
+  const [selectedStore, setSelectedStore] = useState("All Stores");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [selectedMerchantId, setSelectedMerchantId] = useState<string | null>(null);
@@ -25,11 +25,24 @@ export default function MarketplacePage() {
   // Fetch listings from API
   const { listings, loading, error, refetch } = useListings();
 
+  // Build store list from listings (unique stores)
+  const storeFilters: StoreFilter[] = useMemo(() => {
+    const storeMap = new Map<string, string>();
+    listings.forEach((l) => {
+      if (l.merchant?.id && l.merchant?.name) {
+        storeMap.set(l.merchant.id, l.merchant.name);
+      }
+    });
+    return Array.from(storeMap.entries())
+      .map(([id, name]) => ({ id, name }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [listings]);
+
   const filteredListings = useMemo(() => {
     return listings.filter((listing) => {
-      const matchesCategory =
-        selectedCategory === "All Categories" ||
-        listing.category === selectedCategory;
+      const matchesStore =
+        selectedStore === "All Stores" ||
+        listing.merchant?.id === selectedStore;
       const matchesSearch =
         !searchQuery ||
         listing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -37,9 +50,9 @@ export default function MarketplacePage() {
         listing.merchant.name
           .toLowerCase()
           .includes(searchQuery.toLowerCase());
-      return matchesCategory && matchesSearch;
+      return matchesStore && matchesSearch;
     });
-  }, [listings, selectedCategory, searchQuery]);
+  }, [listings, selectedStore, searchQuery]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -52,28 +65,28 @@ export default function MarketplacePage() {
         }}
       />
 
-      {/* Mobile category bar */}
+      {/* Mobile store filter */}
       {!selectedListing && !selectedMerchantId && (
         <div className="border-b border-border bg-card pt-3">
           <CategoryMobileBar
-            categories={categories}
-            selectedCategory={selectedCategory}
-            onSelectCategory={(cat) => {
-              setSelectedCategory(cat);
+            categories={storeFilters}
+            selectedCategory={selectedStore}
+            onSelectCategory={(id) => {
+              setSelectedStore(id);
               setSelectedListing(null);
             }}
           />
         </div>
       )}
 
-      <div className="mx-auto grid max-w-[1600px] gap-6 px-4 py-6 lg:grid-cols-[240px_1fr] xl:grid-cols-[240px_1fr_320px]">
-        {/* Desktop sidebar */}
+      <div className="mx-auto grid max-w-[1800px] gap-6 px-4 py-6 lg:grid-cols-[220px_1fr] xl:grid-cols-[220px_1fr_320px]">
+        {/* Desktop sidebar — store filter */}
         {!selectedListing && !selectedMerchantId && (
           <CategorySidebar
-            categories={categories}
-            selectedCategory={selectedCategory}
-            onSelectCategory={(cat) => {
-              setSelectedCategory(cat);
+            categories={storeFilters}
+            selectedCategory={selectedStore}
+            onSelectCategory={(id) => {
+              setSelectedStore(id);
               setSelectedListing(null);
             }}
           />
@@ -103,9 +116,9 @@ export default function MarketplacePage() {
             <>
               <div className="mb-4 flex items-center justify-between">
                 <h1 className="text-lg font-semibold text-foreground">
-                  {selectedCategory === "All Categories"
+                  {selectedStore === "All Stores"
                     ? "Today's picks"
-                    : selectedCategory}
+                    : storeFilters.find(s => s.id === selectedStore)?.name || "Listings"}
                 </h1>
                 {!loading && !error && (
                   <p className="text-sm text-muted-foreground">
@@ -116,7 +129,7 @@ export default function MarketplacePage() {
               </div>
 
               {loading ? (
-                <ListingGridSkeleton count={8} />
+                <ListingGridSkeleton count={10} />
               ) : error ? (
                 <ErrorDisplay message={error} onRetry={refetch} />
               ) : filteredListings.length === 0 ? (
@@ -125,11 +138,11 @@ export default function MarketplacePage() {
                     No listings found
                   </p>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Try adjusting your search or category filter.
+                    Try adjusting your search or store filter.
                   </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
                   {filteredListings.map((listing) => (
                     <ListingCard
                       key={listing.id}
@@ -144,10 +157,10 @@ export default function MarketplacePage() {
           )}
         </main>
 
-        {/* Activity Feed - Desktop only */}
+        {/* Activity Feed - Desktop only, sticky */}
         {!selectedListing && !selectedMerchantId && (
           <aside className="hidden xl:block">
-            <div className="sticky top-6">
+            <div className="sticky top-4 max-h-[calc(100vh-2rem)] overflow-y-auto">
               <ActivityFeed limit={30} />
             </div>
           </aside>

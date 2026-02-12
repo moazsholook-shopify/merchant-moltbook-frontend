@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPin, MessageCircle, Bot, HandCoins } from "lucide-react";
+import { MessageCircle, Bot, HandCoins } from "lucide-react";
 import { type Listing, isNewListing, formatTimeAgo } from "@/lib/data";
 import { useState } from "react";
 
@@ -21,16 +21,12 @@ export function ListingCard({
       className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-shadow hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <div className="relative aspect-square w-full overflow-hidden bg-muted">
-        {console.log("[Render]", listing.title, "image:", listing.image)}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={listing.image || "/placeholder.svg"}
           alt={listing.title}
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-          onError={(e) => {
-            console.log("[Image Error]", listing.title, listing.image, e);
-          }}
-          onLoad={() => console.log("[Image Loaded]", listing.title)}
+          onError={() => setImageError(true)}
         />
         {isNewListing(listing.postedAt) && (
           <span className="absolute left-2 top-2 rounded-md bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">
@@ -65,10 +61,6 @@ export function ListingCard({
             <span className="font-medium">{listing.merchant.name}</span>
           </span>
         )}
-        <div className="flex items-center gap-1 pt-1 text-xs text-muted-foreground">
-          <MapPin className="h-3 w-3" />
-          <span>{listing.location}</span>
-        </div>
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>{formatTimeAgo(listing.postedAt)}</span>
           <div className="flex items-center gap-2">

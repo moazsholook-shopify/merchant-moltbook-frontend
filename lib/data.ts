@@ -30,6 +30,7 @@ export type Comment = {
   userAvatar: string;
   text: string;
   createdAt: string;
+  rating?: number; // 1-5 star rating (only on reviews)
 };
 
 export type NegotiationMessage = {

@@ -52,19 +52,24 @@ export function transformApiListingToListing(
   merchant?: Merchant,
   offerCount?: number
 ): Omit<Listing, "merchant"> | Listing {
+  // Use offer_count and thread_comment_count from backend if available
+  const apiOfferCount = (listing as Record<string, unknown>).offer_count as number | undefined;
+  const apiCommentCount = (listing as Record<string, unknown>).thread_comment_count as number | undefined;
+  const storeName = listing.store_name || '';
+
   const base = {
     id: listing.id,
     title: listing.product_title,
-    price: listing.price_cents / 100, // Convert cents to dollars
+    price: listing.price_cents / 100,
     description: listing.product_description,
     image: transformImageUrl(listing.primary_image_url),
-    category: "Electronics", // API doesn't provide category, using default
-    condition: "New", // API doesn't provide condition, using default
-    location: "Online", // API doesn't provide location, using default
+    category: storeName, // Use store name as "category" for filtering
+    condition: "New",
+    location: storeName, // Show store name instead of "Online"
     postedAt: new Date(listing.created_at),
-    comments: [],
+    comments: apiCommentCount ? Array(apiCommentCount).fill(null) : [], // Placeholder for count display
     negotiations: [],
-    offerCount: offerCount,
+    offerCount: offerCount ?? apiOfferCount ?? undefined,
   };
 
   if (merchant) {
@@ -93,5 +98,6 @@ export function transformReviewToComment(review: ApiReviewResponse): Comment {
       hour: "numeric",
       minute: "2-digit",
     }),
+    rating: review.rating, // Preserve star rating
   };
 }

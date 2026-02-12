@@ -44,15 +44,31 @@ function formatActivityTime(dateString: string): string {
 
 function getActivityIcon(activityType: string) {
   if (!activityType) return "📢";
-  switch (activityType.toLowerCase()) {
-    case "listing_created":
-      return "🏷️";
-    case "listing_purchased":
-      return "💰";
-    case "review_created":
-      return "⭐";
-    case "store_created":
+  switch (activityType.toUpperCase()) {
+    case "STORE_CREATED":
       return "🏪";
+    case "LISTING_DROPPED":
+      return "🏷️";
+    case "MESSAGE_POSTED":
+      return "💬";
+    case "OFFER_MADE":
+      return "🤝";
+    case "OFFER_ACCEPTED":
+      return "✅";
+    case "OFFER_REJECTED":
+      return "❌";
+    case "ORDER_PLACED":
+      return "🛒";
+    case "ORDER_DELIVERED":
+      return "📦";
+    case "REVIEW_POSTED":
+      return "⭐";
+    case "TRUST_UPDATED":
+      return "🛡️";
+    case "THREAD_CREATED":
+      return "📝";
+    case "STORE_UPDATE_POSTED":
+      return "✏️";
     default:
       return "📢";
   }
@@ -60,13 +76,49 @@ function getActivityIcon(activityType: string) {
 
 function getActivityColor(activityType: string): "default" | "secondary" | "destructive" | "outline" {
   if (!activityType) return "outline";
-  switch (activityType.toLowerCase()) {
-    case "listing_purchased":
+  switch (activityType.toUpperCase()) {
+    case "ORDER_PLACED":
+    case "ORDER_DELIVERED":
       return "default";
-    case "review_created":
+    case "REVIEW_POSTED":
+    case "TRUST_UPDATED":
       return "secondary";
+    case "OFFER_REJECTED":
+      return "destructive";
     default:
       return "outline";
+  }
+}
+
+function getActivityDescription(activity: { type: string; meta: Record<string, unknown> }): string {
+  const type = (activity.type || "").toUpperCase();
+  switch (type) {
+    case "STORE_CREATED":
+      return "opened a new store";
+    case "LISTING_DROPPED":
+      return "listed a new product";
+    case "MESSAGE_POSTED":
+      return "posted a message";
+    case "OFFER_MADE":
+      return "made an offer";
+    case "OFFER_ACCEPTED":
+      return "accepted an offer";
+    case "OFFER_REJECTED":
+      return "rejected an offer";
+    case "ORDER_PLACED":
+      return "placed an order";
+    case "ORDER_DELIVERED":
+      return "received a delivery";
+    case "REVIEW_POSTED":
+      return "left a review";
+    case "TRUST_UPDATED":
+      return "trust score updated";
+    case "THREAD_CREATED":
+      return "started a discussion";
+    case "STORE_UPDATE_POSTED":
+      return "updated store policies";
+    default:
+      return type.replace(/_/g, " ").toLowerCase();
   }
 }
 
@@ -126,7 +178,7 @@ export function ActivityFeed({ limit = 20 }: { limit?: number }) {
                     <div className="flex-1 space-y-1">
                       <p className="text-sm text-foreground leading-snug">
                         <span className="font-medium">{activity.actor_display_name || activity.actor_name}</span>
-                        {" "}{(activity.meta as Record<string, string>)?.rationale || activity.type?.replace(/_/g, " ").toLowerCase()}
+                        {" "}{getActivityDescription(activity)}
                       </p>
                       <div className="flex items-center gap-2">
                         <Badge
