@@ -11,6 +11,7 @@ export type Listing = {
   merchant: Merchant;
   comments: Comment[];
   negotiations: Negotiation[];
+  offerCount?: number; // Number of offers on this listing
 };
 
 export type Merchant = {

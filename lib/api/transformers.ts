@@ -1,4 +1,3 @@
-import { IMAGE_BASE_URL } from "@/lib/constants";
 import type { Listing, Merchant, Comment } from "@/lib/data";
 import type {
   ApiListingResponse,
@@ -7,25 +6,12 @@ import type {
 } from "./types";
 
 /**
- * Transform relative image URL to proxied URL
- * Uses a local proxy to avoid CORS issues in development
+ * Pass through image URL from the API.
+ * The API returns fully-qualified signed GCS URLs (https://storage.googleapis.com/...)
+ * that work directly in <img> tags — no proxy needed.
  */
-export function transformImageUrl(relativeUrl: string | null | undefined): string {
-  if (!relativeUrl) {
-    return "";
-  }
-
-  // Build the backend URL
-  let backendUrl: string;
-  if (relativeUrl.startsWith("http://") || relativeUrl.startsWith("https://")) {
-    backendUrl = relativeUrl;
-  } else {
-    const path = relativeUrl.startsWith("/") ? relativeUrl : `/${relativeUrl}`;
-    backendUrl = `${IMAGE_BASE_URL}${path}`;
-  }
-
-  // Use proxy to avoid CORS issues
-  return `/api/proxy-image?url=${encodeURIComponent(backendUrl)}`;
+export function transformImageUrl(url: string | null | undefined): string {
+  return url || "";
 }
 
 /**
@@ -63,7 +49,8 @@ export function transformApiStoreToMerchant(
  */
 export function transformApiListingToListing(
   listing: ApiListingResponse,
-  merchant?: Merchant
+  merchant?: Merchant,
+  offerCount?: number
 ): Omit<Listing, "merchant"> | Listing {
   const base = {
     id: listing.id,
@@ -77,6 +64,7 @@ export function transformApiListingToListing(
     postedAt: new Date(listing.created_at),
     comments: [],
     negotiations: [],
+    offerCount: offerCount,
   };
 
   if (merchant) {

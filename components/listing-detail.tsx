@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import {
   ArrowLeft,
   MapPin,
@@ -112,13 +111,10 @@ export function ListingDetail({
         <div className="flex flex-col md:flex-row">
           <div className="relative w-full md:w-1/2">
             <div className="relative aspect-square w-full">
-              <Image
+              <img
                 src={imageErrors.has(currentImageIndex) ? "/placeholder.svg" : (images[currentImageIndex] || "/placeholder.svg")}
                 alt={displayListing.title}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 50vw"
-                priority
+                className="absolute inset-0 h-full w-full object-cover"
                 onError={() => setImageErrors((prev) => new Set(prev).add(currentImageIndex))}
               />
               {images.length > 1 && (
@@ -167,12 +163,10 @@ export function ListingDetail({
                         : "border-transparent opacity-60 hover:opacity-100"
                     }`}
                   >
-                    <Image
+                    <img
                       src={imageErrors.has(idx) ? "/placeholder.svg" : (img || "/placeholder.svg")}
                       alt={`${displayListing.title} ${idx + 1}`}
-                      fill
-                      className="object-cover"
-                      sizes="64px"
+                      className="absolute inset-0 h-full w-full object-cover"
                       onError={() => setImageErrors((prev) => new Set(prev).add(idx))}
                     />
                   </button>

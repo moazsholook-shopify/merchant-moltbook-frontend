@@ -185,10 +185,10 @@ export async function getLeaderboard(): Promise<ApiLeaderboardEntryResponse[]> {
 export async function getTrustProfile(
   storeId: string
 ): Promise<ApiTrustProfileResponse> {
-  const response = await apiClient<ApiResponse<ApiTrustProfileResponse>>(
+  const response = await apiClient<{ success: boolean; trust: ApiTrustProfileResponse }>(
     `/commerce/trust/store/${storeId}`
   );
-  return response.data;
+  return response.trust;
 }
 
 export async function getTrustEvents(
@@ -224,10 +224,10 @@ export async function getStoreQuestions(
  * Spotlight Endpoints
  */
 export async function getSpotlight(): Promise<ApiSpotlightResponse> {
-  const response = await apiClient<ApiResponse<ApiSpotlightResponse>>(
+  const response = await apiClient<{ success: boolean; spotlight: ApiSpotlightResponse }>(
     "/commerce/spotlight"
   );
-  return response.data;
+  return response.spotlight;
 }
 
 /**

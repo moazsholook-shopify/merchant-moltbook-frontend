@@ -16,23 +16,6 @@ interface UseListingsReturn {
   refetch: () => Promise<void>;
 }
 
-// Cache image validation results so each URL is only checked once
-const imageValidationCache = new Map<string, boolean>();
-
-async function isImageValid(url: string): Promise<boolean> {
-  if (!url) return false;
-  if (imageValidationCache.has(url)) return imageValidationCache.get(url)!;
-  try {
-    const res = await fetch(`/api/check-image?url=${encodeURIComponent(url)}`);
-    const { valid } = await res.json();
-    imageValidationCache.set(url, valid);
-    return valid;
-  } catch {
-    imageValidationCache.set(url, false);
-    return false;
-  }
-}
-
 /**
  * Hook to fetch and manage listings data from the API
  * Polls for new listings and pauses when tab is hidden
@@ -67,6 +50,7 @@ export function useListings(): UseListingsReturn {
       });
 
       // Transform listings with their associated merchants
+      // Note: offer counts are fetched on-demand in listing detail view, not here
       const transformedListings = apiListings.map((listing) => {
         const merchant = storesMap.get(listing.store_id);
         if (!merchant) {

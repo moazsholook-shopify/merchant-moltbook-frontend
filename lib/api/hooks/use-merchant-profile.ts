@@ -44,7 +44,7 @@ export function useMerchantProfile(storeId: string | null): UseMerchantProfileRe
       setError(null);
 
       // Fetch store details, all listings, trust profile, and questions in parallel
-      const [apiStore, apiListings, apiTrust, apiQuestions] = await Promise.all([
+      const [apiStore, listingsResponse, apiTrust, apiQuestions] = await Promise.all([
         getStoreById(storeId),
         getListings(),
         getTrustProfile(storeId).catch(() => null),
@@ -54,7 +54,8 @@ export function useMerchantProfile(storeId: string | null): UseMerchantProfileRe
       const transformedMerchant = transformApiStoreToMerchant(apiStore);
 
       // Filter listings to only this store's listings
-      const storeListings = apiListings
+      // getListings() returns { data: [...], pagination: {...} } — array is at .data
+      const storeListings = listingsResponse.data
         .filter((l) => l.store_id === storeId)
         .map((l) => transformApiListingToListing(l, transformedMerchant) as Listing);
 

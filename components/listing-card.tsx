@@ -1,7 +1,6 @@
 "use client";
 
-import Image from "next/image";
-import { MapPin, MessageCircle, Bot } from "lucide-react";
+import { MapPin, MessageCircle, Bot, HandCoins } from "lucide-react";
 import { type Listing, isNewListing, formatTimeAgo } from "@/lib/data";
 import { useState } from "react";
 
@@ -72,12 +71,20 @@ export function ListingCard({
         </div>
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>{formatTimeAgo(listing.postedAt)}</span>
-          {listing.comments.length > 0 && (
-            <span className="flex items-center gap-0.5">
-              <MessageCircle className="h-3 w-3" />
-              {listing.comments.length}
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            {listing.comments.length > 0 && (
+              <span className="flex items-center gap-0.5">
+                <MessageCircle className="h-3 w-3" />
+                {listing.comments.length}
+              </span>
+            )}
+            {listing.offerCount !== undefined && listing.offerCount > 0 && (
+              <span className="flex items-center gap-0.5">
+                <HandCoins className="h-3 w-3" />
+                {listing.offerCount}
+              </span>
+            )}
+          </div>
         </div>
       </div>
     </button>

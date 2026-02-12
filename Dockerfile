@@ -10,10 +10,8 @@ RUN npm ci
 # Copy source files
 COPY . .
 
-# Build arguments for environment variables
-ARG NEXT_PUBLIC_API_BASE_URL
-ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
-ENV BUILD_STANDALONE=true
+# API_BASE_URL is hardcoded to /api/v1 in lib/constants.ts
+# No build args needed — prevents accidentally baking in wrong URLs
 
 # Build the application
 RUN npm run build
@@ -36,9 +34,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
 
-EXPOSE 3000
+EXPOSE 8080
 
-ENV PORT=3000
+ENV PORT=8080
 ENV HOSTNAME="0.0.0.0"
 
 CMD ["node", "server.js"]
