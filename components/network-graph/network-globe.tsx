@@ -107,16 +107,28 @@ export function NetworkGlobe({ onNavigateToStore }: NetworkGlobeProps) {
   }, [activities, agentLocationMap, storeOwnerMap, enabledTypes]);
 
   // Labels — all agents shown as city text on the globe
+  // Deduplicate labels by city — multiple agents in the same city get one label
   const labels = useMemo(() => {
-    return points.map((p) => ({
-      lat: p.lat,
-      lng: p.lng,
-      text: p.city,
-      size: p.type === "MERCHANT" ? 1.2 : 0.8,
-      name: p.name,
-      agentType: p.type,
-      activityCount: p.activityCount,
-    }));
+    const cityMap = new Map<string, { lat: number; lng: number; text: string; names: string[]; hasMerchant: boolean; activityCount: number }>();
+    for (const p of points) {
+      const key = `${p.lat},${p.lng}`;
+      const existing = cityMap.get(key);
+      if (existing) {
+        existing.names.push(p.name);
+        existing.activityCount += p.activityCount;
+        if (p.type === "MERCHANT") existing.hasMerchant = true;
+      } else {
+        cityMap.set(key, {
+          lat: p.lat,
+          lng: p.lng,
+          text: p.city,
+          names: [p.name],
+          hasMerchant: p.type === "MERCHANT",
+          activityCount: p.activityCount,
+        });
+      }
+    }
+    return Array.from(cityMap.values());
   }, [points]);
 
   // Detect new activities → fire arcs that blaze then dim
@@ -240,14 +252,13 @@ export function NetworkGlobe({ onNavigateToStore }: NetworkGlobeProps) {
           htmlLng="lng"
           htmlAltitude={0.01}
           htmlElement={(d: object) => {
-            const l = d as { name: string; agentType: string; text: string; activityCount: number; size: number };
+            const l = d as { names: string[]; hasMerchant: boolean; text: string; activityCount: number };
             const el = document.createElement("div");
-            const isMerchant = l.agentType === "MERCHANT";
             el.style.cssText = `
               color: rgba(255,255,255,0.92);
               font-family: Inter, -apple-system, system-ui, sans-serif;
-              font-size: ${isMerchant ? "11px" : "9px"};
-              font-weight: ${isMerchant ? "600" : "400"};
+              font-size: ${l.hasMerchant ? "11px" : "9px"};
+              font-weight: ${l.hasMerchant ? "600" : "400"};
               letter-spacing: 0.03em;
               text-shadow: 0 0 6px rgba(255,255,255,0.4), 0 1px 3px rgba(0,0,0,0.8);
               pointer-events: auto;
@@ -256,7 +267,7 @@ export function NetworkGlobe({ onNavigateToStore }: NetworkGlobeProps) {
               transform: translate(-50%, -50%);
             `;
             el.textContent = l.text;
-            el.title = `${l.name} (${l.agentType.toLowerCase()}) · ${l.activityCount} events`;
+            el.title = `${l.names.join(", ")} · ${l.activityCount} events`;
             return el;
           }}
           // Arcs — per-arc rendering based on phase
