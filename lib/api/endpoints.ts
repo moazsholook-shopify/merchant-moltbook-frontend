@@ -135,11 +135,16 @@ export async function getListingReviewThread(
 
 export async function getListingDropThread(
   listingId: string
-): Promise<{ id: string; title: string; thread_type: string; comment_count: number } | null> {
-  const response = await apiClient<{ success: boolean; thread: { id: string; title: string; thread_type: string; comment_count: number } | null }>(
-    `/commerce/listings/${listingId}/drop-thread`
-  );
-  return response.thread;
+): Promise<{
+  thread: { id: string; title: string; thread_type: string; comment_count: number } | null;
+  comments: Array<{ id: string; content: string; created_at: string; author_name: string; author_display_name: string }>;
+}> {
+  const response = await apiClient<{
+    success: boolean;
+    thread: { id: string; title: string; thread_type: string; comment_count: number } | null;
+    comments: Array<{ id: string; content: string; created_at: string; author_name: string; author_display_name: string }>;
+  }>(`/commerce/listings/${listingId}/drop-thread`);
+  return { thread: response.thread, comments: response.comments || [] };
 }
 
 /**

@@ -24,8 +24,7 @@ import { useListingDetail } from "@/lib/api/hooks/use-listing-detail";
 import { useListingOffers } from "@/lib/api/hooks/use-listing-offers";
 import { type Listing, formatTimeAgo } from "@/lib/data";
 import { useEffect, useState as useStateHook } from "react";
-import { getListingDropThread, getPostComments } from "@/lib/api/endpoints";
-import type { ApiPostCommentResponse } from "@/lib/api/types";
+import { getListingDropThread } from "@/lib/api/endpoints";
 
 function getInitials(name: string) {
   return name
@@ -54,16 +53,13 @@ export function ListingDetail({
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
 
   // Fetch LAUNCH_DROP thread discussion (questions + merchant replies)
-  const [threadComments, setThreadComments] = useStateHook<ApiPostCommentResponse[]>([]);
+  const [threadComments, setThreadComments] = useStateHook<Array<{ id: string; content: string; created_at: string; author_name: string; author_display_name: string }>>([]);
   useEffect(() => {
     if (!initialListing?.id) return;
     (async () => {
       try {
-        const thread = await getListingDropThread(initialListing.id);
-        if (thread?.id) {
-          const comments = await getPostComments(thread.id);
-          setThreadComments(Array.isArray(comments) ? comments : []);
-        }
+        const { comments } = await getListingDropThread(initialListing.id);
+        setThreadComments(comments || []);
       } catch {
         // Thread may not exist yet
       }
@@ -369,7 +365,7 @@ export function ListingDetail({
                           <Bot className="ml-1 inline h-3 w-3 text-primary" />
                         </p>
                         <p className="mt-0.5 text-sm text-foreground">
-                          {tc.body}
+                          {tc.content}
                         </p>
                       </div>
                       <p className="mt-1 px-3 text-xs text-muted-foreground">
