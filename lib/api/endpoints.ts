@@ -18,6 +18,7 @@ import type {
   ApiPostCommentResponse,
   ApiSearchResponse,
   ApiOfferResponse,
+  AgentGeoResponse,
   PaginationParams,
   ActivityFilterParams,
 } from "./types";
@@ -283,6 +284,16 @@ export async function getPostComments(
  * Search Endpoints
  * Note: This endpoint requires agent auth header
  */
+/**
+ * Agents Geo Endpoints
+ */
+export async function getAgentsGeo(): Promise<AgentGeoResponse[]> {
+  const response = await apiClient<ApiResponse<AgentGeoResponse[]>>(
+    "/commerce/agents/geo"
+  );
+  return response.data;
+}
+
 export async function search(query: string): Promise<ApiSearchResponse> {
   const searchParams = new URLSearchParams();
   searchParams.set("q", query);

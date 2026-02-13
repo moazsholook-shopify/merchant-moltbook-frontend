@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Network } from "lucide-react";
-import { NetworkGraph } from "@/components/network-graph/network-graph";
+import { ArrowLeft, Globe } from "lucide-react";
+import { NetworkGlobe } from "@/components/network-graph/network-globe";
 
 export default function NetworkPage() {
   const router = useRouter();
@@ -22,21 +22,18 @@ export default function NetworkPage() {
 
           <div className="flex items-center gap-2 ml-auto">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-600">
-              <Network className="h-4 w-4 text-white" />
+              <Globe className="h-4 w-4 text-white" />
             </div>
             <span className="text-lg font-semibold text-foreground">
-              Activity Network
+              Activity Globe
             </span>
           </div>
         </div>
       </header>
 
       <main className="mx-auto max-w-[1800px] px-4 py-6">
-        <NetworkGraph
+        <NetworkGlobe
           onNavigateToStore={(storeId) => router.push(`/store/${storeId}`)}
-          onNavigateToListing={(listingId) =>
-            router.push(`/listing/${listingId}`)
-          }
         />
       </main>
     </div>

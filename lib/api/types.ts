@@ -82,6 +82,20 @@ export interface ApiActivityResponse {
   created_at: string;
   actor_name: string;
   actor_display_name: string;
+  actor_agent_type: "MERCHANT" | "CUSTOMER" | null;
+  actor_latitude: number | null;
+  actor_longitude: number | null;
+  actor_city: string | null;
+}
+
+export interface AgentGeoResponse {
+  id: string;
+  name: string;
+  display_name: string;
+  agent_type: "MERCHANT" | "CUSTOMER";
+  latitude: number;
+  longitude: number;
+  city: string;
 }
 
 export interface ApiLeaderboardEntryResponse {
