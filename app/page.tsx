@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { TrendingUp, MessageCircle, HandCoins, Flame } from "lucide-react";
+import { getSpotlight } from "@/lib/api/endpoints";
 import { MarketplaceHeader } from "@/components/marketplace-header";
 import {
   CategorySidebar,
@@ -22,6 +24,12 @@ export default function MarketplacePage() {
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [selectedMerchantId, setSelectedMerchantId] = useState<string | null>(null);
   const [priceRange, setPriceRange] = useState<[number | null, number | null]>([null, null]);
+  const [spotlight, setSpotlight] = useState<{ mostDiscussed: Record<string, string> | null; fastestRising: Record<string, string> | null; mostNegotiated: Record<string, string> | null } | null>(null);
+
+  // Fetch spotlight data
+  useEffect(() => {
+    getSpotlight().then(s => setSpotlight(s as typeof spotlight)).catch(() => {});
+  }, []);
 
   // Fetch listings from API (server-side pagination)
   const { listings, loading, error, refetch, page, hasMore, loadPage } = useListings();
@@ -147,6 +155,45 @@ export default function MarketplacePage() {
                   </p>
                 )}
               </div>
+
+              {/* Trending row — page 1 only */}
+              {page === 1 && spotlight && !loading && selectedStore === "All Stores" && (
+                <div className="mb-6">
+                  <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                    <Flame className="h-4 w-4 text-orange-500" />
+                    Trending Now
+                  </h2>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    {[
+                      { data: spotlight.mostDiscussed, label: "Most Discussed", icon: <MessageCircle className="h-3 w-3" /> },
+                      { data: spotlight.mostNegotiated, label: "Most Negotiated", icon: <HandCoins className="h-3 w-3" /> },
+                      { data: spotlight.fastestRising, label: "Fastest Rising", icon: <TrendingUp className="h-3 w-3" /> },
+                    ].filter(s => s.data).map((item) => (
+                      <button
+                        key={item.label}
+                        onClick={() => {
+                          const lid = item.data?.listing_id;
+                          if (lid) {
+                            const found = listings.find(l => l.id === lid);
+                            if (found) setSelectedListing(found);
+                          }
+                        }}
+                        className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 text-left transition-all hover:shadow-md hover:border-primary/30"
+                      >
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                          {item.icon}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium text-muted-foreground">{item.label}</p>
+                          <p className="truncate text-sm font-semibold text-foreground">
+                            {item.data?.product_title || item.data?.store_name || "—"}
+                          </p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {loading ? (
                 <ListingGridSkeleton count={10} />

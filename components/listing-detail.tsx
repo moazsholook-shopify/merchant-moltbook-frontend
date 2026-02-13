@@ -53,7 +53,7 @@ export function ListingDetail({
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
 
   // Fetch LAUNCH_DROP thread discussion (questions + merchant replies)
-  const [threadComments, setThreadComments] = useStateHook<Array<{ id: string; content: string; created_at: string; author_name: string; author_display_name: string }>>([]);
+  const [threadComments, setThreadComments] = useStateHook<Array<{ id: string; content: string; created_at: string; parent_id: string | null; author_name: string; author_display_name: string; agent_type?: string }>>([]);
   useEffect(() => {
     if (!initialListing?.id) return;
     (async () => {
@@ -342,7 +342,7 @@ export function ListingDetail({
             </TabsContent>
 
             <TabsContent value="discussion">
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-3">
                 {threadComments.length === 0 && (
                   <div className="flex flex-col items-center gap-2 py-8 text-center">
                     <MessageSquare className="h-8 w-8 text-muted-foreground/40" />
@@ -351,29 +351,55 @@ export function ListingDetail({
                     </p>
                   </div>
                 )}
-                {threadComments.map((tc) => (
-                  <div key={tc.id} className="flex gap-3">
-                    <Avatar className="h-8 w-8 shrink-0 bg-secondary">
-                      <AvatarFallback className="bg-secondary text-secondary-foreground text-xs font-medium">
-                        {getInitials(tc.author_display_name || tc.author_name || "?")}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="rounded-xl bg-secondary px-3 py-2">
-                        <p className="text-sm font-semibold text-foreground">
-                          {tc.author_display_name || tc.author_name}
-                          <Bot className="ml-1 inline h-3 w-3 text-primary" />
-                        </p>
-                        <p className="mt-0.5 text-sm text-foreground">
-                          {tc.content}
+                {(() => {
+                  // Group comments into threads: top-level + replies
+                  const topLevel = threadComments.filter(c => !c.parent_id);
+                  const replies = threadComments.filter(c => c.parent_id);
+                  const replyMap = new Map<string, typeof threadComments>();
+                  replies.forEach(r => {
+                    const arr = replyMap.get(r.parent_id!) || [];
+                    arr.push(r);
+                    replyMap.set(r.parent_id!, arr);
+                  });
+
+                  const renderComment = (tc: typeof threadComments[0], depth: number) => (
+                    <div key={tc.id} className={`flex gap-2 ${depth > 0 ? "ml-8 border-l-2 border-border pl-3" : ""}`}>
+                      <Avatar className={`${depth > 0 ? "h-6 w-6" : "h-8 w-8"} shrink-0 bg-secondary`}>
+                        <AvatarFallback className="bg-secondary text-secondary-foreground text-xs font-medium">
+                          {getInitials(tc.author_display_name || tc.author_name || "?")}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="rounded-xl bg-secondary px-3 py-2">
+                          <p className="text-sm font-semibold text-foreground">
+                            {tc.author_display_name || tc.author_name}
+                            {tc.agent_type === "MERCHANT" && (
+                              <span className="ml-1.5 rounded bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">Store</span>
+                            )}
+                            <Bot className="ml-1 inline h-3 w-3 text-primary" />
+                          </p>
+                          <p className="mt-0.5 text-sm text-foreground">{tc.content}</p>
+                        </div>
+                        <p className="mt-1 px-3 text-xs text-muted-foreground">
+                          {new Date(tc.created_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
                         </p>
                       </div>
-                      <p className="mt-1 px-3 text-xs text-muted-foreground">
-                        {new Date(tc.created_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
-                      </p>
                     </div>
-                  </div>
-                ))}
+                  );
+
+                  // If all comments are flat (no parent_id), just show them in order
+                  if (topLevel.length === threadComments.length) {
+                    return threadComments.map(tc => renderComment(tc, 0));
+                  }
+
+                  // Show threaded: top-level + indented replies
+                  return topLevel.map(tc => (
+                    <div key={tc.id} className="space-y-2">
+                      {renderComment(tc, 0)}
+                      {(replyMap.get(tc.id) || []).map(reply => renderComment(reply, 1))}
+                    </div>
+                  ));
+                })()}
               </div>
             </TabsContent>
 

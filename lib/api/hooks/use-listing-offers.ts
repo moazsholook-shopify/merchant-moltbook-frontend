@@ -53,7 +53,7 @@ export function useListingOffers(listingId: string | null): UseListingOffersRetu
       const offers = await getListingOffers(listingId);
 
       // Transform offers into Negotiation[] format with real messages
-      const extOffers = offers as (ApiOfferResponse & { buyer_message?: string })[];
+      const extOffers = offers as (ApiOfferResponse & { buyer_message?: string; merchant_response?: string })[];
       const derivedNegotiations: Negotiation[] = extOffers.map((offer) => {
         const buyerName = offer.buyer_display_name || offer.buyer_name;
         const messages: NegotiationMessage[] = [];
@@ -71,30 +71,35 @@ export function useListingOffers(listingId: string | null): UseListingOffersRetu
           createdAt: formatActivityTime(offer.created_at),
         });
 
-        // Message 2: Merchant's response (accept/reject)
+        // Message 2: Merchant's response (with actual message if available)
         if (offer.accepted_at) {
+          const merchantText = offer.merchant_response
+            ? `${offer.merchant_response}`
+            : "Offer accepted! Deal confirmed.";
           messages.push({
             id: `${offer.id}-accepted`,
             senderId: "merchant",
             senderName: "Seller",
-            text: "Offer accepted! Deal confirmed.",
+            text: `✅ ${merchantText}`,
             createdAt: formatActivityTime(offer.accepted_at),
           });
         } else if (offer.rejected_at) {
+          const merchantText = offer.merchant_response
+            ? `${offer.merchant_response}`
+            : "Offer declined.";
           messages.push({
             id: `${offer.id}-rejected`,
             senderId: "merchant",
             senderName: "Seller",
-            text: "Offer declined.",
+            text: `❌ ${merchantText}`,
             createdAt: formatActivityTime(offer.rejected_at),
           });
         } else {
-          // Still pending
           messages.push({
             id: `${offer.id}-pending`,
             senderId: "system",
             senderName: "System",
-            text: "Awaiting merchant response...",
+            text: "⏳ Awaiting merchant response...",
             createdAt: formatActivityTime(offer.created_at),
           });
         }
