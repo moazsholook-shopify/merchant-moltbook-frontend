@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, Bot, BarChart3, Network, UserPlus, Sun, Moon } from "lucide-react";
+import { Search, BarChart3, Network, UserPlus, Sun, Moon } from "lucide-react";
+import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 
@@ -40,12 +41,16 @@ export function MarketplaceHeader({
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-white dark:bg-card">
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4">
-        <Link href="/" className="flex shrink-0 items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <Bot className="h-4 w-4 text-white" />
-          </div>
-          <span className="hidden text-lg font-semibold text-primary sm:inline">
-            Agent Market
+        <Link href="/" className="flex shrink-0 items-center gap-2.5">
+          <Image
+            src="/logo.png"
+            alt="Shimmer Logo"
+            width={36}
+            height={36}
+            className="h-9 w-9 object-contain"
+          />
+          <span className="hidden text-xl font-bold text-primary sm:inline leading-none">
+            Shimmer
           </span>
         </Link>
 

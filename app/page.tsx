@@ -18,9 +18,12 @@ import { ErrorDisplay } from "@/components/error-display";
 import { ActivityFeed } from "@/components/activity-feed";
 import { useListings } from "@/lib/api/hooks/use-listings";
 import type { StoreFilter } from "@/components/category-sidebar";
+import { ShimmerLanding } from "@/components/shimmer-landing";
 
 export default function MarketplacePage() {
   const router = useRouter();
+  const [showLanding, setShowLanding] = useState(true);
+  const [hasEntered, setHasEntered] = useState(false);
   const [selectedStore, setSelectedStore] = useState("All Stores");
   const [searchQuery, setSearchQuery] = useState("");
   const [priceRange, setPriceRange] = useState<[number | null, number | null]>([null, null]);
@@ -171,17 +174,31 @@ export default function MarketplacePage() {
     }
   };
 
+  // Handle entering from landing page
+  const handleEnterMarketplace = () => {
+    setShowLanding(false);
+    setHasEntered(true);
+  };
+
+  // Show landing page first
+  if (showLanding) {
+    return <ShimmerLanding onEnter={handleEnterMarketplace} />;
+  }
+
   return (
     <div className="min-h-screen bg-background">
-      <MarketplaceHeader
+      <div className={hasEntered ? "animate-slide-down" : ""}>
+        <MarketplaceHeader
         searchQuery={searchQuery}
         onSearchChange={(q) => {
           setSearchQuery(q);
         }}
       />
 
+      </div>
+
       {/* Mobile store filter */}
-      <div className="border-b border-border bg-card pt-3">
+      <div className={`border-b border-border bg-card pt-3 ${hasEntered ? "animate-slide-down" : ""}`} style={{ animationDelay: "0.1s" }}>
         <CategoryMobileBar
           categories={storeFilters}
           selectedCategory={selectedStore}
@@ -191,7 +208,7 @@ export default function MarketplacePage() {
 
       <div className="mx-auto grid max-w-[1800px] gap-6 px-4 py-6 lg:grid-cols-[220px_1fr] xl:grid-cols-[220px_1fr_320px]">
         {/* Desktop sidebar — store filter (sticky) */}
-        <div className="hidden lg:block">
+        <div className={`hidden lg:block ${hasEntered ? "animate-slide-in-left" : ""}`} style={{ animationDelay: "0.2s" }}>
           <div className="sticky top-20">
             <CategorySidebar
               categories={storeFilters}
@@ -208,7 +225,7 @@ export default function MarketplacePage() {
         </div>
 
         {/* Main content */}
-        <main>
+        <main className={hasEntered ? "animate-page-enter" : ""} style={{ animationDelay: "0.3s" }}>
           <div className="mb-4 flex items-center justify-between">
             <h1 className="text-lg font-semibold text-foreground">
               {selectedStore === "All Stores"
@@ -297,13 +314,18 @@ export default function MarketplacePage() {
                     });
                   }
 
-                  return items.map((listing) => (
-                    <ListingCard
+                  return items.map((listing, index) => (
+                    <div
                       key={listing.isPromoted ? `promo-${listing.id}` : listing.id}
-                      listing={listing}
-                      onClick={() => router.push(`/listing/${listing.id}`)}
-                      onMerchantClick={() => router.push(`/store/${listing.merchant.id}`)}
-                    />
+                      className={hasEntered ? "animate-fade-in-up opacity-0" : ""}
+                      style={{ animationDelay: hasEntered ? `${0.4 + index * 0.05}s` : "0s" }}
+                    >
+                      <ListingCard
+                        listing={listing}
+                        onClick={() => router.push(`/listing/${listing.id}`)}
+                        onMerchantClick={() => router.push(`/store/${listing.merchant.id}`)}
+                      />
+                    </div>
                   ));
                 })()}
               </div>
@@ -337,7 +359,7 @@ export default function MarketplacePage() {
         </main>
 
         {/* Activity Feed + Advertised Merchant - Desktop only, sticky */}
-        <aside className="hidden xl:block">
+        <aside className={`hidden xl:block ${hasEntered ? "animate-slide-in-right" : ""}`} style={{ animationDelay: "0.4s" }}>
           <div className="sticky top-20 space-y-4 max-h-[calc(100vh-6rem)] overflow-y-auto">
             <div ref={activityFeedRef}>
               <ActivityFeed

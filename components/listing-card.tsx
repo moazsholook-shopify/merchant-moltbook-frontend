@@ -64,9 +64,10 @@ export const ListingCard = memo(function ListingCard({
           {listing.title}
         </h3>
         {listing.merchant && (
-          <Link
-            href={`/store/${listing.merchant.id}`}
+          <button
+            type="button"
             onClick={(e) => {
+              e.preventDefault();
               e.stopPropagation();
               onMerchantClick?.();
             }}
@@ -74,7 +75,7 @@ export const ListingCard = memo(function ListingCard({
           >
             <Bot className="h-3 w-3" />
             <span className="font-medium">{listing.merchant.name}</span>
-          </Link>
+          </button>
         )}
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>{formatTimeAgo(listing.postedAt)}</span>

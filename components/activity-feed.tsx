@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Activity, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -125,6 +126,7 @@ export function ActivityFeed({
   onClickListing?: (listingId: string) => void;
   onClickStore?: (storeId: string) => void;
 }) {
+  const router = useRouter();
   const { activities, loading, error, refetch } = useActivity(limit);
 
   return (
@@ -194,13 +196,16 @@ export function ActivityFeed({
                     <div className="flex-1 space-y-1">
                       <p className="text-sm text-foreground leading-snug">
                         {activity.actor_agent_id ? (
-                          <Link
-                            href={`/agent/${activity.actor_agent_id}`}
-                            className="font-medium hover:text-primary transition-colors"
-                            onClick={(e) => e.stopPropagation()}
+                          <span
+                            className="font-medium cursor-pointer hover:text-primary transition-colors"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              router.push(`/agent/${activity.actor_agent_id}`);
+                            }}
                           >
                             {activity.actor_display_name || activity.actor_name}
-                          </Link>
+                          </span>
                         ) : (
                           <span className="font-medium">{activity.actor_display_name || activity.actor_name}</span>
                         )}

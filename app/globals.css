@@ -8,6 +8,140 @@
   }
 }
 
+/* Floating animation for landing page cards */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-15px) rotate(-1deg);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Button shimmer effect */
+@keyframes button-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+.animate-button-shimmer {
+  animation: button-shimmer 3s ease-in-out infinite;
+}
+
+/* Sparkle fly animation for exit transition */
+@keyframes sparkle-fly {
+  0% {
+    opacity: 1;
+    transform: scale(0) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.5) rotate(180deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0) rotate(360deg) translateY(-100px);
+  }
+}
+
+.animate-sparkle-fly {
+  animation: sparkle-fly 0.8s ease-out forwards;
+}
+
+/* Page entrance animation */
+@keyframes page-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-page-enter {
+  animation: page-enter 0.6s ease-out forwards;
+}
+
+/* Staggered fade in for grid items */
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out forwards;
+}
+
+/* Header slide down */
+@keyframes slide-down {
+  0% {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-down {
+  animation: slide-down 0.5s ease-out forwards;
+}
+
+/* Sidebar slide in from left */
+@keyframes slide-in-left {
+  0% {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.5s ease-out forwards;
+}
+
+/* Sidebar slide in from right */
+@keyframes slide-in-right {
+  0% {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.5s ease-out forwards;
+}
+
 @layer base {
   :root {
     --background: 0 0% 97%;
@@ -16,20 +150,20 @@
     --card-foreground: 220 13% 13%;
     --popover: 0 0% 100%;
     --popover-foreground: 220 13% 13%;
-    --primary: 259 79% 59%;               /* Shop Purple */
+    --primary: 262 59% 54%;               /* Logo Purple #7846CF */
     --primary-foreground: 0 0% 100%;
     --secondary: 220 14% 94%;
     --secondary-foreground: 220 13% 13%;
     --muted: 220 14% 94%;
     --muted-foreground: 220 9% 46%;
-    --accent: 259 79% 59%;
+    --accent: 262 59% 54%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
     --border: 220 13% 90%;
     --input: 220 13% 90%;
-    --ring: 259 79% 59%;
-    --chart-1: 259 79% 59%;
+    --ring: 262 59% 54%;
+    --chart-1: 262 59% 54%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
@@ -37,12 +171,12 @@
     --radius: 0.5rem;
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 220 13% 13%;
-    --sidebar-primary: 259 79% 59%;
+    --sidebar-primary: 262 59% 54%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 220 14% 94%;
     --sidebar-accent-foreground: 220 13% 13%;
     --sidebar-border: 220 13% 90%;
-    --sidebar-ring: 259 79% 59%;
+    --sidebar-ring: 262 59% 54%;
   }
 
   .dark {
@@ -52,32 +186,32 @@
     --card-foreground: 210 40% 95%;
     --popover: 222 47% 11%;
     --popover-foreground: 210 40% 95%;
-    --primary: 259 79% 59%;               /* Shop Purple */
+    --primary: 262 59% 54%;               /* Logo Purple #7846CF */
     --primary-foreground: 0 0% 100%;
     --secondary: 217 33% 17%;
     --secondary-foreground: 210 40% 95%;
     --muted: 217 33% 17%;
     --muted-foreground: 215 20% 55%;
-    --accent: 259 79% 59%;
+    --accent: 262 59% 54%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;
     --border: 217 33% 20%;
     --input: 217 33% 20%;
-    --ring: 259 79% 59%;
-    --chart-1: 259 79% 59%;
+    --ring: 262 59% 54%;
+    --chart-1: 262 59% 54%;
     --chart-2: 173 58% 45%;
     --chart-3: 197 37% 40%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --sidebar-background: 222 47% 11%;
     --sidebar-foreground: 210 40% 95%;
-    --sidebar-primary: 259 79% 59%;
+    --sidebar-primary: 262 59% 54%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 217 33% 17%;
     --sidebar-accent-foreground: 210 40% 95%;
     --sidebar-border: 217 33% 20%;
-    --sidebar-ring: 259 79% 59%;
+    --sidebar-ring: 262 59% 54%;
   }
 }
 
