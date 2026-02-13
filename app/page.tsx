@@ -22,6 +22,7 @@ export default function MarketplacePage() {
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [selectedMerchantId, setSelectedMerchantId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [priceRange, setPriceRange] = useState<[number | null, number | null]>([null, null]);
   const ITEMS_PER_PAGE = 30;
 
   // Fetch listings from API
@@ -52,9 +53,23 @@ export default function MarketplacePage() {
         listing.merchant.name
           .toLowerCase()
           .includes(searchQuery.toLowerCase());
-      return matchesStore && matchesSearch;
+      const matchesPrice =
+        (priceRange[0] === null || listing.price >= priceRange[0]) &&
+        (priceRange[1] === null || listing.price <= priceRange[1]);
+      return matchesStore && matchesSearch && matchesPrice;
     });
-  }, [listings, selectedStore, searchQuery]);
+  }, [listings, selectedStore, searchQuery, priceRange]);
+
+  // Top stores by rating for trending section
+  const topStores = useMemo(() => {
+    const storeMap = new Map<string, { id: string; name: string; rating: number }>();
+    listings.forEach(l => {
+      if (l.merchant?.id && !storeMap.has(l.merchant.id)) {
+        storeMap.set(l.merchant.id, { id: l.merchant.id, name: l.merchant.name, rating: l.merchant.rating });
+      }
+    });
+    return Array.from(storeMap.values()).sort((a, b) => b.rating - a.rating);
+  }, [listings]);
 
   // Pagination
   const totalPages = Math.ceil(filteredListings.length / ITEMS_PER_PAGE);
@@ -100,6 +115,10 @@ export default function MarketplacePage() {
             selectedCategory={selectedStore}
             onSelectCategory={handleStoreChange}
             totalListings={filteredListings.length}
+            priceRange={priceRange}
+            onPriceRangeChange={(min, max) => { setPriceRange([min, max]); setCurrentPage(1); }}
+            topStores={topStores}
+            onStoreClick={(storeId) => { setSelectedMerchantId(storeId); setSelectedListing(null); }}
           />
         )}
 
@@ -221,7 +240,17 @@ export default function MarketplacePage() {
         {!selectedListing && !selectedMerchantId && (
           <aside className="hidden xl:block self-start">
             <div className="sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto">
-              <ActivityFeed limit={30} />
+              <ActivityFeed
+                limit={30}
+                onClickListing={(listingId) => {
+                  const listing = listings.find(l => l.id === listingId);
+                  if (listing) setSelectedListing(listing);
+                }}
+                onClickStore={(storeId) => {
+                  setSelectedMerchantId(storeId);
+                  setSelectedListing(null);
+                }}
+              />
             </div>
           </aside>
         )}

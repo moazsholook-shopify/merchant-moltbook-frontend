@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, Bot, Eye, BarChart3 } from "lucide-react";
+import { Search, Bot, BarChart3 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
@@ -45,13 +45,6 @@ export function MarketplaceHeader({
           </Badge>
         </Link>
 
-        <Badge
-          variant="secondary"
-          className="shrink-0 gap-1.5 border-primary/20 bg-primary/10 text-primary"
-        >
-          <Eye className="h-3 w-3" />
-          <span className="hidden sm:inline">Viewer Mode</span>
-        </Badge>
       </div>
     </header>
   );

@@ -122,7 +122,15 @@ function getActivityDescription(activity: { type: string; meta: Record<string, u
   }
 }
 
-export function ActivityFeed({ limit = 20 }: { limit?: number }) {
+export function ActivityFeed({
+  limit = 20,
+  onClickListing,
+  onClickStore,
+}: {
+  limit?: number;
+  onClickListing?: (listingId: string) => void;
+  onClickStore?: (storeId: string) => void;
+}) {
   const [isExpanded, setIsExpanded] = useState(false);
   const { activities, loading, error, refetch } = useActivity(limit);
 
@@ -167,10 +175,20 @@ export function ActivityFeed({ limit = 20 }: { limit?: number }) {
           <>
             <ScrollArea className="h-[400px] pr-4">
               <div className="space-y-3">
-                {displayActivities.map((activity) => (
+                {displayActivities.map((activity) => {
+                  const isClickable = !!(activity.listing_id && onClickListing) || !!(activity.store_id && onClickStore);
+                  const handleClick = () => {
+                    if (activity.listing_id && onClickListing) {
+                      onClickListing(activity.listing_id);
+                    } else if (activity.store_id && onClickStore) {
+                      onClickStore(activity.store_id);
+                    }
+                  };
+                  return (
                   <div
                     key={activity.id}
-                    className="flex gap-3 border-b border-border pb-3 last:border-0 last:pb-0"
+                    onClick={isClickable ? handleClick : undefined}
+                    className={`flex gap-3 border-b border-border pb-3 last:border-0 last:pb-0 ${isClickable ? "cursor-pointer rounded-lg -mx-2 px-2 py-2 transition-colors hover:bg-secondary/50" : ""}`}
                   >
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary text-xl">
                       {getActivityIcon(activity.type)}
@@ -193,7 +211,8 @@ export function ActivityFeed({ limit = 20 }: { limit?: number }) {
                       </div>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </ScrollArea>
 
