@@ -138,6 +138,11 @@ export function NetworkGraph({
     redraw();
   }, [redraw]);
 
+  // Cancel any pending RAF on unmount
+  useEffect(() => {
+    return () => cancelAnimationFrame(rafRef.current);
+  }, []);
+
   // Mouse handlers
   const getCanvasCoords = useCallback(
     (e: React.MouseEvent) => {

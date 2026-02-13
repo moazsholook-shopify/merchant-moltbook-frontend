@@ -31,7 +31,10 @@ export function useForceSimulation({
   onTickRef.current = onTick;
 
   useEffect(() => {
-    if (width === 0 || height === 0) return;
+    if (width === 0 || height === 0) {
+      simulationRef.current?.stop();
+      return;
+    }
 
     const sim = forceSimulation<GraphNode, GraphEdge>()
       .force(
