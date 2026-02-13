@@ -111,7 +111,7 @@ export function NetworkGlobe({ onNavigateToStore }: NetworkGlobeProps) {
   const labels = useMemo(() => {
     const cityMap = new Map<string, { lat: number; lng: number; text: string; names: string[]; hasMerchant: boolean; activityCount: number }>();
     for (const p of points) {
-      const key = `${p.lat},${p.lng}`;
+      const key = p.city;
       const existing = cityMap.get(key);
       if (existing) {
         existing.names.push(p.name);
