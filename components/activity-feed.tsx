@@ -75,18 +75,12 @@ function getActivityIcon(activityType: string) {
 }
 
 function getActivityColor(activityType: string): "default" | "secondary" | "destructive" | "outline" {
-  if (!activityType) return "outline";
+  if (!activityType) return "secondary";
   switch (activityType.toUpperCase()) {
-    case "ORDER_PLACED":
-    case "ORDER_DELIVERED":
-      return "default";
-    case "REVIEW_POSTED":
-    case "TRUST_UPDATED":
-      return "secondary";
     case "OFFER_REJECTED":
       return "destructive";
     default:
-      return "outline";
+      return "secondary";
   }
 }
 
