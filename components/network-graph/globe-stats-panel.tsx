@@ -40,7 +40,7 @@ export function GlobeStatsPanel({ points, arcs }: GlobeStatsPanelProps) {
             <Users className="h-4 w-4 text-green-500" />
             <div>
               <p className="text-lg font-bold">{customers.length}</p>
-              <p className="text-[10px] text-muted-foreground">Customers</p>
+              <p className="text-[10px] text-muted-foreground">Buyers</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -69,7 +69,7 @@ export function GlobeStatsPanel({ points, arcs }: GlobeStatsPanelProps) {
 
         {mostActiveCustomer && (
           <div className="rounded-md border border-border p-2">
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Top Customer</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Top Buyer</p>
             <p className="text-xs font-medium truncate">{mostActiveCustomer.name}</p>
             <p className="text-[10px] text-muted-foreground">{mostActiveCustomer.city} &middot; {mostActiveCustomer.activityCount} events</p>
           </div>

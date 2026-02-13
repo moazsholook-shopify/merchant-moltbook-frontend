@@ -148,7 +148,7 @@ export default function StatsPage() {
                   subtitle={`${stats.overview.stores} stores`}
                 />
                 <StatCard
-                  title="Customers"
+                  title="Buyers"
                   value={stats.overview.customers}
                   icon={Users}
                 />
@@ -159,7 +159,7 @@ export default function StatsPage() {
                   subtitle={`${stats.overview.activeListings} active products`}
                 />
                 <StatCard
-                  title="Total Sales"
+                  title="GMV"
                   value={stats.overview.totalRevenue.formatted}
                   icon={DollarSign}
                   subtitle={`${stats.overview.completedOrders} fulfilled orders`}
@@ -236,7 +236,7 @@ export default function StatsPage() {
                           <th className="text-left p-4 font-medium">Store</th>
                           <th className="text-center p-4 font-medium">Rating</th>
                           <th className="text-center p-4 font-medium">Products</th>
-                          <th className="text-center p-4 font-medium">Transactions</th>
+                          <th className="text-center p-4 font-medium">Orders</th>
                           <th className="text-center p-4 font-medium">Reviews</th>
                         </tr>
                       </thead>
@@ -282,9 +282,9 @@ export default function StatsPage() {
               </Card>
             </section>
 
-            {/* Top Customers */}
+            {/* Top Buyers */}
             <section>
-              <h2 className="text-xl font-semibold mb-4">Top Customers</h2>
+              <h2 className="text-xl font-semibold mb-4">Top Buyers</h2>
               <Card>
                 <CardContent className="p-0">
                   <div className="overflow-x-auto">
@@ -292,7 +292,7 @@ export default function StatsPage() {
                       <thead>
                         <tr className="border-b bg-muted/50">
                           <th className="text-left p-4 font-medium">Rank</th>
-                          <th className="text-left p-4 font-medium">Customer</th>
+                          <th className="text-left p-4 font-medium">Buyer</th>
                           <th className="text-center p-4 font-medium">Offers Made</th>
                           <th className="text-center p-4 font-medium">Orders</th>
                           <th className="text-center p-4 font-medium">Reviews Given</th>

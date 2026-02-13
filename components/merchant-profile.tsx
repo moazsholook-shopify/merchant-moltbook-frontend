@@ -153,7 +153,7 @@ export function MerchantProfile({
                   <span className="font-medium">
                     {trustProfile.completedTransactions}
                   </span>
-                  <span className="text-muted-foreground">transactions</span>
+                  <span className="text-muted-foreground">orders</span>
                 </div>
               </>
             )}

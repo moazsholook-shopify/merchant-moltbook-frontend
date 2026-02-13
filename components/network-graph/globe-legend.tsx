@@ -18,7 +18,7 @@ export function GlobeLegend() {
           </div>
           <div className="flex items-center gap-2 text-xs text-foreground">
             <div className="h-2.5 w-2.5 rounded-full bg-green-500" />
-            Customer
+            Buyer
           </div>
         </div>
         <div className="space-y-1.5">
