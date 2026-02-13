@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { getStoreById, getTrustProfile, getStoreQuestions } from "../endpoints";
+import { useState, useEffect, useCallback } from "react";
+import { getStoreById, getListings, getTrustProfile, getStoreQuestions } from "../endpoints";
 import { transformApiStoreToMerchant, transformApiListingToListing } from "../transformers";
 import type { Listing, Merchant } from "@/lib/data";
 import type { ApiStoreResponse, ApiTrustProfileResponse, ApiQuestionResponse } from "../types";
@@ -17,30 +17,25 @@ interface UseMerchantProfileReturn {
 }
 
 /**
- * Hook to fetch merchant profile data: store details, trust profile, and questions.
- * Accepts pre-loaded listings from the parent to avoid redundant full-list fetches.
+ * Hook to fetch merchant profile data: store details, listings, trust profile, and questions.
+ * Always fetches listings from the API to ensure data is available on direct navigation.
  */
 export function useMerchantProfile(
-  storeId: string | null,
-  allListings: Listing[] = []
+  storeId: string | null
 ): UseMerchantProfileReturn {
   const [store, setStore] = useState<ApiStoreResponse | null>(null);
   const [merchant, setMerchant] = useState<Merchant | null>(null);
+  const [listings, setListings] = useState<Listing[]>([]);
   const [trustProfile, setTrustProfile] = useState<ApiTrustProfileResponse | null>(null);
   const [questions, setQuestions] = useState<ApiQuestionResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Filter pre-loaded listings for this store (avoids fetching all listings again)
-  const listings = useMemo(
-    () => (storeId ? allListings.filter((l) => l.merchant.id === storeId) : []),
-    [storeId, allListings]
-  );
-
   const fetchProfile = useCallback(async () => {
     if (!storeId) {
       setStore(null);
       setMerchant(null);
+      setListings([]);
       setTrustProfile(null);
       setQuestions([]);
       setLoading(false);
@@ -51,15 +46,23 @@ export function useMerchantProfile(
       setLoading(true);
       setError(null);
 
-      // Only fetch store details, trust profile, and questions — listings come from props
-      const [apiStore, apiTrust, apiQuestions] = await Promise.all([
+      const [apiStore, apiTrust, apiQuestions, apiListingsResult] = await Promise.all([
         getStoreById(storeId),
         getTrustProfile(storeId).catch(() => null),
         getStoreQuestions(storeId).catch(() => []),
+        getListings({ limit: 200 }).catch(() => ({ data: [] })),
       ]);
 
+      const merchantData = transformApiStoreToMerchant(apiStore);
+
+      // Filter listings for this store and transform
+      const storeListings = apiListingsResult.data
+        .filter((l) => l.store_id === storeId)
+        .map((l) => transformApiListingToListing(l, merchantData) as Listing);
+
       setStore(apiStore);
-      setMerchant(transformApiStoreToMerchant(apiStore));
+      setMerchant(merchantData);
+      setListings(storeListings);
       setTrustProfile(apiTrust);
       setQuestions(apiQuestions);
     } catch (err) {
