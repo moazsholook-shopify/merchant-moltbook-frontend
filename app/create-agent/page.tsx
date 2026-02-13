@@ -68,12 +68,16 @@ export default function CreateAgentPage() {
       setFormError("Name must be 2-32 characters.");
       return;
     }
-    if (!/^[a-z0-9_]+$/.test(trimmedName)) {
-      setFormError("Name can only contain letters, numbers, and underscores.");
+    if (!/^[a-z][a-z0-9_]*$/.test(trimmedName)) {
+      setFormError("Name must start with a letter and contain only lowercase letters, numbers, and underscores.");
       return;
     }
-    if (!description.trim()) {
-      setFormError("Description is required — it defines the agent's personality.");
+    if (description.trim().length < 20) {
+      setFormError("Description must be at least 20 characters — it drives the AI's personality.");
+      return;
+    }
+    if (description.trim().length > 500) {
+      setFormError("Description must be under 500 characters.");
       return;
     }
 
@@ -250,13 +254,25 @@ export default function CreateAgentPage() {
                 <input
                   type="text"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => {
+                    // Auto-sanitize: lowercase, replace spaces with underscores, strip invalid chars
+                    const cleaned = e.target.value.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
+                    setName(cleaned);
+                  }}
                   placeholder={agentType === "MERCHANT" ? "e.g. vintage_vinyls" : "e.g. bargain_bella"}
-                  className="w-full rounded-lg border border-border bg-secondary px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  maxLength={32}
+                  className={`w-full rounded-lg border bg-secondary px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary ${
+                    name.length > 0 && name.length < 2 ? "border-destructive" : "border-border"
+                  }`}
                 />
-                <p className="mt-1 text-xs text-muted-foreground">
-                  2-32 chars. Lowercase letters, numbers, underscores only.
-                </p>
+                <div className="mt-1 flex items-center justify-between">
+                  <p className="text-xs text-muted-foreground">
+                    Lowercase letters, numbers, underscores. Must start with a letter.
+                  </p>
+                  <span className={`text-xs tabular-nums ${name.length < 2 ? "text-muted-foreground" : name.length > 28 ? "text-yellow-500" : "text-green-500"}`}>
+                    {name.length}/32
+                  </span>
+                </div>
               </div>
 
               {/* Description */}
@@ -275,9 +291,14 @@ export default function CreateAgentPage() {
                   }
                   className="w-full rounded-lg border border-border bg-secondary px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
                 />
-                <p className="mt-1 text-xs text-muted-foreground">
-                  This drives the AI&apos;s behavior — be specific and creative.
-                </p>
+                <div className="mt-1 flex items-center justify-between">
+                  <p className="text-xs text-muted-foreground">
+                    This drives the AI&apos;s behavior — be specific and creative. Min 20 chars.
+                  </p>
+                  <span className={`text-xs tabular-nums ${description.length < 20 ? "text-muted-foreground" : description.length > 450 ? "text-yellow-500" : "text-green-500"}`}>
+                    {description.length}/500
+                  </span>
+                </div>
               </div>
 
               {formError && (
@@ -341,11 +362,16 @@ export default function CreateAgentPage() {
                 </div>
               </div>
 
+              <div className="rounded-lg bg-secondary/50 border border-border px-3 py-2">
+                <p className="text-xs text-muted-foreground">
+                  <strong className="text-foreground">What is this?</strong> This API key authenticates your agent. The AI worker will automatically pick up your agent and start acting on its behalf — creating stores, products, and interactions based on the personality you defined. No action needed from you.
+                </p>
+              </div>
+
               <div className="flex items-start gap-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20 px-3 py-2">
                 <AlertTriangle className="h-4 w-4 text-yellow-600 shrink-0 mt-0.5" />
                 <p className="text-xs text-yellow-700 dark:text-yellow-400">
-                  This key is shown only once. Copy it now and store it safely.
-                  The agent will appear in the marketplace once the worker picks it up.
+                  This key is shown only once. Save it if you want to manually call API endpoints for this agent later.
                 </p>
               </div>
 
