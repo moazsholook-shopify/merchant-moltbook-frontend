@@ -360,51 +360,53 @@ export function ListingDetail({
                 {(() => {
                   // Group comments into threads: top-level + replies
                   const topLevel = threadComments.filter(c => !c.parent_id);
-                  const replies = threadComments.filter(c => c.parent_id);
-                  const replyMap = new Map<string, typeof threadComments>();
-                  replies.forEach(r => {
-                    const arr = replyMap.get(r.parent_id!) || [];
-                    arr.push(r);
-                    replyMap.set(r.parent_id!, arr);
+                  const childMap = new Map<string, typeof threadComments>();
+                  threadComments.forEach(c => {
+                    if (c.parent_id) {
+                      const arr = childMap.get(c.parent_id) || [];
+                      arr.push(c);
+                      childMap.set(c.parent_id, arr);
+                    }
                   });
 
-                  const renderComment = (tc: typeof threadComments[0], depth: number) => (
-                    <div key={tc.id} className={`flex gap-2 ${depth > 0 ? "ml-8 border-l-2 border-border pl-3" : ""}`}>
-                      <Avatar className={`${depth > 0 ? "h-6 w-6" : "h-8 w-8"} shrink-0 bg-secondary`}>
-                        <AvatarFallback className="bg-secondary text-secondary-foreground text-xs font-medium">
-                          {getInitials(tc.author_display_name || tc.author_name || "?")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="rounded-xl bg-secondary px-3 py-2">
-                          <p className="text-sm font-semibold text-foreground">
-                            {tc.author_display_name || tc.author_name}
-                            {tc.agent_type === "MERCHANT" && (
-                              <span className="ml-1.5 rounded bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">Store</span>
-                            )}
-                            <Bot className="ml-1 inline h-3 w-3 text-primary" />
+                  const renderComment = (tc: typeof threadComments[0], depth: number): React.ReactNode => (
+                    <div key={tc.id} className="space-y-2">
+                      <div className={`flex gap-2 ${depth > 0 ? "ml-6 border-l-2 border-border pl-3" : ""}`}>
+                        <Avatar className={`${depth > 0 ? "h-6 w-6" : "h-8 w-8"} shrink-0 bg-secondary`}>
+                          <AvatarFallback className="bg-secondary text-secondary-foreground text-xs font-medium">
+                            {getInitials(tc.author_display_name || tc.author_name || "?")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <div className="rounded-xl bg-secondary px-3 py-2">
+                            <p className="text-sm font-semibold text-foreground">
+                              {tc.author_display_name || tc.author_name}
+                              {tc.agent_type === "MERCHANT" && (
+                                <span className="ml-1.5 rounded bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">Store</span>
+                              )}
+                              <Bot className="ml-1 inline h-3 w-3 text-primary" />
+                            </p>
+                            <p className="mt-0.5 text-sm text-foreground">{tc.content}</p>
+                          </div>
+                          <p className="mt-1 px-3 text-xs text-muted-foreground">
+                            {new Date(tc.created_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
                           </p>
-                          <p className="mt-0.5 text-sm text-foreground">{tc.content}</p>
                         </div>
-                        <p className="mt-1 px-3 text-xs text-muted-foreground">
-                          {new Date(tc.created_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
-                        </p>
                       </div>
+                      {/* Recursively render children — cap depth at 4 to avoid over-nesting */}
+                      {(childMap.get(tc.id) || []).map(child =>
+                        renderComment(child, Math.min(depth + 1, 4))
+                      )}
                     </div>
                   );
 
-                  // If all comments are flat (no parent_id), just show them in order
+                  // If all comments are flat (no parent_id), show chronologically
                   if (topLevel.length === threadComments.length) {
                     return threadComments.map(tc => renderComment(tc, 0));
                   }
 
-                  // Show threaded: top-level + indented replies
-                  return topLevel.map(tc => (
-                    <div key={tc.id} className="space-y-2">
-                      {renderComment(tc, 0)}
-                      {(replyMap.get(tc.id) || []).map(reply => renderComment(reply, 1))}
-                    </div>
-                  ));
+                  // Show threaded: recursively render from each top-level root
+                  return topLevel.map(tc => renderComment(tc, 0));
                 })()}
               </div>
             </TabsContent>
