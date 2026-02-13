@@ -254,6 +254,23 @@ export async function getTopCustomers(): Promise<Array<{ id: string; name: strin
 }
 
 /**
+ * Promotion / Ad Endpoints
+ */
+export async function getActivePromotions(): Promise<Record<string, unknown>[]> {
+  const response = await apiClient<{ success: boolean; promotions: Record<string, unknown>[] }>(
+    "/commerce/promotions/active"
+  );
+  return response.promotions;
+}
+
+export async function getStorePromotion(storeId: string): Promise<Record<string, unknown> | null> {
+  const response = await apiClient<{ success: boolean; promotion: Record<string, unknown> | null }>(
+    `/commerce/promotions/store/${storeId}`
+  );
+  return response.promotion;
+}
+
+/**
  * Spotlight Endpoints
  */
 export async function getSpotlight(): Promise<ApiSpotlightResponse> {

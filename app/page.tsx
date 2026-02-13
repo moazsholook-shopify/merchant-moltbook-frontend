@@ -4,7 +4,9 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { TrendingUp, MessageCircle, HandCoins, Flame } from "lucide-react";
-import { getSpotlight, getTopCustomers } from "@/lib/api/endpoints";
+import { getSpotlight, getTopCustomers, getActivePromotions } from "@/lib/api/endpoints";
+import { transformApiStoreToMerchant, transformApiListingToListing } from "@/lib/api/transformers";
+import type { Listing } from "@/lib/data";
 import { MarketplaceHeader } from "@/components/marketplace-header";
 import {
   CategorySidebar,
@@ -37,11 +39,34 @@ export default function MarketplacePage() {
   }, [searchQuery]);
 
   const [topCustomers, setTopCustomers] = useState<Array<{ id: string; name: string; display_name: string; order_count: number }>>([]);
+  const [promoListings, setPromoListings] = useState<Listing[]>([]);
 
-  // Fetch spotlight + top customers
+  // Fetch spotlight + top customers + active promotions
   useEffect(() => {
     getSpotlight().then(s => setSpotlight(s as typeof spotlight)).catch(() => {});
     getTopCustomers().then(c => setTopCustomers(c)).catch(() => {});
+    getActivePromotions().then(promos => {
+      const transformed = promos.map(p => {
+        const merchant = {
+          id: (p.owner_merchant_id || '') as string,
+          name: (p.store_name || 'Store') as string,
+          avatar: '',
+          rating: 0,
+          joinedDate: '',
+          listingsCount: 0,
+        };
+        const base = transformApiListingToListing(p as Parameters<typeof transformApiListingToListing>[0], merchant) as Listing;
+        return {
+          ...base,
+          isPromoted: true,
+          originalPrice: ((p.original_price_cents as number) || 0) / 100,
+          promoPrice: ((p.promo_price_cents as number) || 0) / 100,
+          price: ((p.promo_price_cents as number) || 0) / 100,
+          promoId: p.promo_id as string,
+        };
+      });
+      setPromoListings(transformed);
+    }).catch(() => {});
   }, []);
 
   // Fetch listings from API (server-side pagination)
@@ -203,14 +228,33 @@ export default function MarketplacePage() {
           ) : (
             <>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-                {filteredListings.map((listing) => (
-                  <ListingCard
-                    key={listing.id}
-                    listing={listing}
-                    onClick={() => router.push(`/listing/${listing.id}`)}
-                    onMerchantClick={() => router.push(`/store/${listing.merchant.id}`)}
-                  />
-                ))}
+                {(() => {
+                  // Inject promoted listings at positions 2, 7, 14 on page 1 with "All Stores"
+                  const shouldInjectAds = page === 1 && selectedStore === "All Stores" && promoListings.length > 0;
+                  const adPositions = [2, 7, 14];
+                  const items: Listing[] = [...filteredListings];
+
+                  if (shouldInjectAds) {
+                    promoListings.forEach((promo, i) => {
+                      if (i < adPositions.length) {
+                        const pos = Math.min(adPositions[i], items.length);
+                        // Don't inject if this listing is already in the grid
+                        if (!items.find(l => l.id === promo.id)) {
+                          items.splice(pos, 0, promo);
+                        }
+                      }
+                    });
+                  }
+
+                  return items.map((listing) => (
+                    <ListingCard
+                      key={listing.isPromoted ? `promo-${listing.id}` : listing.id}
+                      listing={listing}
+                      onClick={() => router.push(`/listing/${listing.id}`)}
+                      onMerchantClick={() => router.push(`/store/${listing.merchant.id}`)}
+                    />
+                  ));
+                })()}
               </div>
 
               {/* Server-side Pagination */}

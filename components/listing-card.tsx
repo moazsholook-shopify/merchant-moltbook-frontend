@@ -2,7 +2,7 @@
 
 import { memo } from "react";
 import Link from "next/link";
-import { MessageCircle, Bot, HandCoins } from "lucide-react";
+import { MessageCircle, Bot, HandCoins, Megaphone } from "lucide-react";
 import { type Listing, isNewListing, formatTimeAgo, formatPrice } from "@/lib/data";
 
 export const ListingCard = memo(function ListingCard({
@@ -14,11 +14,17 @@ export const ListingCard = memo(function ListingCard({
   onClick?: () => void;
   onMerchantClick?: () => void;
 }) {
+  const isPromoted = listing.isPromoted;
+
   return (
     <Link
       href={`/listing/${listing.id}`}
       onClick={onClick}
-      className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-shadow hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className={`group flex flex-col overflow-hidden rounded-xl border bg-card text-left transition-shadow hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+        isPromoted
+          ? "border-blue-400/40 shadow-sm shadow-blue-500/5"
+          : "border-border"
+      }`}
     >
       <div className="relative aspect-square w-full overflow-hidden bg-muted">
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -27,16 +33,33 @@ export const ListingCard = memo(function ListingCard({
           alt={listing.title}
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
-        {isNewListing(listing.postedAt) && (
+        {isPromoted && (
+          <span className="absolute right-2 top-2 flex items-center gap-1 rounded-md bg-blue-500/90 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+            <Megaphone className="h-2.5 w-2.5" />
+            Ad
+          </span>
+        )}
+        {!isPromoted && isNewListing(listing.postedAt) && (
           <span className="absolute left-2 top-2 rounded-md bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">
             New
           </span>
         )}
       </div>
       <div className="flex flex-1 flex-col gap-1.5 p-3">
-        <p className="text-lg font-bold text-foreground">
-          ${formatPrice(listing.price)}
-        </p>
+        {isPromoted && listing.originalPrice ? (
+          <div className="flex items-baseline gap-2">
+            <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
+              ${formatPrice(listing.promoPrice || listing.price)}
+            </p>
+            <p className="text-sm text-muted-foreground line-through">
+              ${formatPrice(listing.originalPrice)}
+            </p>
+          </div>
+        ) : (
+          <p className="text-lg font-bold text-foreground">
+            ${formatPrice(listing.price)}
+          </p>
+        )}
         <h3 className="line-clamp-2 text-sm font-medium leading-snug text-foreground">
           {listing.title}
         </h3>

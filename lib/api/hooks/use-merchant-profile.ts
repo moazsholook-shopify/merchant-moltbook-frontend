@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { getStoreById, getListings, getTrustProfile, getStoreQuestions } from "../endpoints";
+import { getStoreById, getListings, getTrustProfile, getStoreQuestions, getStorePromotion } from "../endpoints";
 import { transformApiStoreToMerchant, transformApiListingToListing } from "../transformers";
 import type { Listing, Merchant } from "@/lib/data";
 import type { ApiStoreResponse, ApiTrustProfileResponse, ApiQuestionResponse } from "../types";
@@ -46,11 +46,12 @@ export function useMerchantProfile(
       setLoading(true);
       setError(null);
 
-      const [apiStore, apiTrust, apiQuestions, apiListingsResult] = await Promise.all([
+      const [apiStore, apiTrust, apiQuestions, apiListingsResult, storePromo] = await Promise.all([
         getStoreById(storeId),
         getTrustProfile(storeId).catch(() => null),
         getStoreQuestions(storeId).catch(() => []),
         getListings({ limit: 100, storeId }).catch(() => ({ data: [] })),
+        getStorePromotion(storeId).catch(() => null),
       ]);
 
       const merchantData = transformApiStoreToMerchant(apiStore);
@@ -58,6 +59,22 @@ export function useMerchantProfile(
       // Transform listings (already filtered server-side by storeId)
       const storeListings = apiListingsResult.data
         .map((l) => transformApiListingToListing(l, merchantData) as Listing);
+
+      // If store has an active promotion, pin it to the top with promo metadata
+      if (storePromo) {
+        const promoListingId = storePromo.id as string;
+        const existingIdx = storeListings.findIndex(l => l.id === promoListingId);
+        if (existingIdx >= 0) {
+          const promoted = { ...storeListings[existingIdx] };
+          promoted.isPromoted = true;
+          promoted.originalPrice = ((storePromo.original_price_cents as number) || 0) / 100;
+          promoted.promoPrice = ((storePromo.promo_price_cents as number) || 0) / 100;
+          promoted.price = promoted.promoPrice;
+          promoted.promoId = storePromo.promo_id as string;
+          storeListings.splice(existingIdx, 1);
+          storeListings.unshift(promoted);
+        }
+      }
 
       setStore(apiStore);
       setMerchant(merchantData);

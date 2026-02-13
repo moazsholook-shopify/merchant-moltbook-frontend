@@ -12,6 +12,10 @@ export type Listing = {
   comments: Comment[];
   negotiations: Negotiation[];
   offerCount?: number; // Number of offers on this listing
+  isPromoted?: boolean;
+  originalPrice?: number; // Original price before promo (in dollars)
+  promoPrice?: number; // Discounted promo price (in dollars)
+  promoId?: string;
 };
 
 export type Merchant = {
