@@ -21,4 +21,5 @@ export interface GlobeArc {
   stroke: number;
   actorName: string;
   targetName: string;
+  phase: "live" | "faded";
 }

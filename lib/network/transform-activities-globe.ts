@@ -1,6 +1,5 @@
-import type { ApiActivityResponse, AgentGeoResponse } from "@/lib/api/types";
-import type { GlobePoint, GlobeArc } from "./globe-types";
-import { getActivityColor } from "./activity-colors";
+import type { ApiActivityResponse } from "@/lib/api/types";
+import type { GlobePoint } from "./globe-types";
 
 interface AgentLocation {
   lat: number;
@@ -10,14 +9,18 @@ interface AgentLocation {
   type: "MERCHANT" | "CUSTOMER";
 }
 
-export function transformActivitiesForGlobe(
+/**
+ * Build globe points from all known agents.
+ * Activity counts are derived from the activity list.
+ * Arcs are handled separately in the globe component (fire-once pulse).
+ */
+export function buildGlobePoints(
   activities: ApiActivityResponse[],
   agentLocationMap: Map<string, AgentLocation>,
-  storeOwnerMap: Map<string, string>, // storeId → ownerMerchantId
+  storeOwnerMap: Map<string, string>,
   enabledTypes: Set<string>
-): { points: GlobePoint[]; arcs: GlobeArc[] } {
+): GlobePoint[] {
   const pointMap = new Map<string, GlobePoint>();
-  const arcAggregation = new Map<string, GlobeArc>();
 
   // Build points from all known agents with locations
   for (const [agentId, loc] of agentLocationMap) {
@@ -34,48 +37,23 @@ export function transformActivitiesForGlobe(
     });
   }
 
-  // Process activities to build arcs and increment activity counts
+  // Count activities per agent
   for (const activity of activities) {
     if (!enabledTypes.has(activity.type)) continue;
 
     const actorId = activity.actor_agent_id;
     const storeId = activity.store_id;
-    if (!actorId || !storeId) continue;
 
-    // Increment actor activity count
-    const actorPoint = pointMap.get(actorId);
-    if (actorPoint) actorPoint.activityCount++;
-
-    // Find the store owner (merchant) location
-    const ownerId = storeOwnerMap.get(storeId);
-    if (!ownerId) continue;
-
-    const ownerPoint = pointMap.get(ownerId);
-    if (ownerPoint) ownerPoint.activityCount++;
-
-    // Only create arcs between agents with locations, and skip self-arcs
-    const actorLoc = agentLocationMap.get(actorId);
-    const ownerLoc = agentLocationMap.get(ownerId);
-    if (!actorLoc || !ownerLoc || actorId === ownerId) continue;
-
-    // Aggregate arcs between same pair
-    const pairKey = `${actorId}-${ownerId}-${activity.type}`;
-    const existing = arcAggregation.get(pairKey);
-    if (existing) {
-      existing.stroke = Math.min(existing.stroke + 0.1, 1.5);
-    } else {
-      arcAggregation.set(pairKey, {
-        id: pairKey,
-        startLat: actorLoc.lat,
-        startLng: actorLoc.lng,
-        endLat: ownerLoc.lat,
-        endLng: ownerLoc.lng,
-        activityType: activity.type,
-        color: getActivityColor(activity.type),
-        stroke: 0.3,
-        actorName: actorLoc.name,
-        targetName: ownerLoc.name,
-      });
+    if (actorId) {
+      const p = pointMap.get(actorId);
+      if (p) p.activityCount++;
+    }
+    if (storeId) {
+      const ownerId = storeOwnerMap.get(storeId);
+      if (ownerId) {
+        const p = pointMap.get(ownerId);
+        if (p) p.activityCount++;
+      }
     }
   }
 
@@ -85,8 +63,5 @@ export function transformActivitiesForGlobe(
     point.size = base + Math.min(point.activityCount * 0.08, 0.5);
   }
 
-  return {
-    points: Array.from(pointMap.values()),
-    arcs: Array.from(arcAggregation.values()),
-  };
+  return Array.from(pointMap.values());
 }
