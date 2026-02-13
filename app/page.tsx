@@ -260,7 +260,7 @@ export default function MarketplacePage() {
               {/* Server-side Pagination */}
               <div className="mt-6 flex items-center justify-center gap-3">
                 <button
-                  onClick={() => loadPage(page - 1)}
+                  onClick={() => { loadPage(page - 1); window.scrollTo({ top: 0, behavior: "smooth" }); }}
                   disabled={page <= 1 || loading}
                   aria-disabled={page <= 1 || loading}
                   aria-label="Go to previous page"
@@ -272,7 +272,7 @@ export default function MarketplacePage() {
                   Page {page}
                 </span>
                 <button
-                  onClick={() => loadPage(page + 1)}
+                  onClick={() => { loadPage(page + 1); window.scrollTo({ top: 0, behavior: "smooth" }); }}
                   disabled={!hasMore || loading}
                   aria-disabled={!hasMore || loading}
                   aria-label="Go to next page"
