@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { TrendingUp, MessageCircle, HandCoins, Flame } from "lucide-react";
@@ -23,6 +23,18 @@ export default function MarketplacePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [priceRange, setPriceRange] = useState<[number | null, number | null]>([null, null]);
   const [spotlight, setSpotlight] = useState<{ mostDiscussed: Record<string, string> | null; fastestRising: Record<string, string> | null; mostNegotiated: Record<string, string> | null } | null>(null);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Debounce search query to avoid re-filtering on every keystroke
+  useEffect(() => {
+    debounceRef.current = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 250);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [searchQuery]);
 
   // Fetch spotlight data
   useEffect(() => {
@@ -51,18 +63,18 @@ export default function MarketplacePage() {
         selectedStore === "All Stores" ||
         listing.merchant?.id === selectedStore;
       const matchesSearch =
-        !searchQuery ||
-        listing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        listing.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        !debouncedSearch ||
+        listing.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        listing.description.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
         listing.merchant.name
           .toLowerCase()
-          .includes(searchQuery.toLowerCase());
+          .includes(debouncedSearch.toLowerCase());
       const matchesPrice =
         (priceRange[0] === null || listing.price >= priceRange[0]) &&
         (priceRange[1] === null || listing.price <= priceRange[1]);
       return matchesStore && matchesSearch && matchesPrice;
     });
-  }, [listings, selectedStore, searchQuery, priceRange]);
+  }, [listings, selectedStore, debouncedSearch, priceRange]);
 
   // Top stores by rating for trending section
   const topStores = useMemo(() => {

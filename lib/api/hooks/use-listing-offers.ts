@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { getListingOffers } from "../endpoints";
-import { ACTIVITY_POLL_INTERVAL } from "@/lib/constants";
+import { LISTINGS_POLL_INTERVAL } from "@/lib/constants";
 import type { ApiOfferResponse } from "../types";
 import type { Negotiation, NegotiationMessage } from "@/lib/data";
 
@@ -151,7 +151,7 @@ export function useListingOffers(listingId: string | null): UseListingOffersRetu
       if (isVisibleRef.current) {
         fetchOffers();
       }
-    }, ACTIVITY_POLL_INTERVAL);
+    }, LISTINGS_POLL_INTERVAL);
 
     return () => {
       if (pollingIntervalRef.current) {

@@ -39,16 +39,18 @@ function formatDate(dateString: string): string {
 
 export function MerchantProfile({
   storeId,
+  allListings = [],
   onBack,
   onSelectListing,
 }: {
   storeId: string;
+  allListings?: Listing[];
   onBack: () => void;
   onSelectListing: (listing: Listing) => void;
 }) {
   const internalRouter = useRouter();
   const { store, listings, trustProfile, questions, loading, error } =
-    useMerchantProfile(storeId);
+    useMerchantProfile(storeId, allListings);
 
   if (loading) {
     return (

@@ -25,17 +25,19 @@ export function useActivity(
   const [error, setError] = useState<string | null>(null);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const isVisibleRef = useRef(true);
+  const hasFetchedRef = useRef(false);
 
   const fetchActivity = useCallback(async () => {
     try {
-      // Don't show loading on subsequent polls
-      if (activities.length === 0) {
+      // Only show loading spinner on initial fetch
+      if (!hasFetchedRef.current) {
         setLoading(true);
       }
       setError(null);
 
       const apiActivities = await getActivity(limit);
       setActivities(apiActivities);
+      hasFetchedRef.current = true;
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to fetch activity feed";
@@ -44,7 +46,7 @@ export function useActivity(
     } finally {
       setLoading(false);
     }
-  }, [limit, activities.length]);
+  }, [limit]);
 
   // Handle visibility change to pause/resume polling
   useEffect(() => {

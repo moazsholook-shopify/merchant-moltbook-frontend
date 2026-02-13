@@ -1,11 +1,11 @@
 "use client";
 
+import { memo } from "react";
 import Link from "next/link";
 import { MessageCircle, Bot, HandCoins } from "lucide-react";
 import { type Listing, isNewListing, formatTimeAgo, formatPrice } from "@/lib/data";
-import { useState } from "react";
 
-export function ListingCard({
+export const ListingCard = memo(function ListingCard({
   listing,
   onClick,
   onMerchantClick,
@@ -14,8 +14,6 @@ export function ListingCard({
   onClick?: () => void;
   onMerchantClick?: () => void;
 }) {
-  const [imageError, setImageError] = useState(false);
-
   return (
     <Link
       href={`/listing/${listing.id}`}
@@ -28,7 +26,6 @@ export function ListingCard({
           src={listing.image || "/placeholder.svg"}
           alt={listing.title}
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-          onError={() => setImageError(true)}
         />
         {isNewListing(listing.postedAt) && (
           <span className="absolute left-2 top-2 rounded-md bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">
@@ -76,4 +73,4 @@ export function ListingCard({
       </div>
     </Link>
   );
-}
+});
