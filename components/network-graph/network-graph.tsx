@@ -37,6 +37,7 @@ export function NetworkGraph({
   const [displayEdges, setDisplayEdges] = useState<GraphEdge[]>([]);
 
   const existingNodesRef = useRef<Map<string, GraphNode>>(new Map());
+  const redrawLoggedRef = useRef(false);
   const dragNodeRef = useRef<GraphNode | null>(null);
   const isPanningRef = useRef(false);
   const panStartRef = useRef({ x: 0, y: 0 });
@@ -55,11 +56,22 @@ export function NetworkGraph({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    const nodes = simulationAPI.nodesRef.current;
+    const edges = simulationAPI.edgesRef.current;
+
+    // Debug: log first few ticks
+    if (nodes.length > 0 && !redrawLoggedRef.current) {
+      console.log('[network] Drawing:', nodes.length, 'nodes,', edges.length, 'edges');
+      console.log('[network] Sample node:', nodes[0]?.id, 'x=', nodes[0]?.x, 'y=', nodes[0]?.y);
+      console.log('[network] Canvas size:', canvas.width, 'x', canvas.height, 'dims:', dimensions.width, 'x', dimensions.height);
+      redrawLoggedRef.current = true;
+    }
+
     const dpr = window.devicePixelRatio || 1;
     drawFrame({
       ctx,
-      nodes: simulationAPI.nodesRef.current,
-      edges: simulationAPI.edgesRef.current,
+      nodes,
+      edges,
       width: dimensions.width,
       height: dimensions.height,
       transform: transformRef.current,
@@ -113,13 +125,21 @@ export function NetworkGraph({
   // Transform activities into graph data
   // Must depend on dimensions too — simulation only exists after canvas has size
   useEffect(() => {
-    if (activities.length === 0) return;
-    if (dimensions.width === 0 || dimensions.height === 0) return;
+    if (activities.length === 0) {
+      console.log('[network] No activities yet');
+      return;
+    }
+    if (dimensions.width === 0 || dimensions.height === 0) {
+      console.log('[network] Dimensions not ready:', dimensions);
+      return;
+    }
 
     const graphData = transformActivitiesToGraph(
       activities,
       existingNodesRef.current
     );
+
+    console.log('[network] Graph data:', graphData.nodes.length, 'nodes,', graphData.edges.length, 'edges, dimensions:', dimensions.width, 'x', dimensions.height);
 
     existingNodesRef.current = new Map(
       graphData.nodes.map((n) => [n.id, n])
