@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, Bot, BarChart3, Sun, Moon } from "lucide-react";
+import { Search, Bot, BarChart3, Network, Sun, Moon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
@@ -68,6 +68,16 @@ export function MarketplaceHeader({
           >
             <BarChart3 className="h-3 w-3" />
             <span className="hidden sm:inline">Stats</span>
+          </Badge>
+        </Link>
+
+        <Link href="/network">
+          <Badge
+            variant="secondary"
+            className="shrink-0 gap-1.5 border-purple-500/20 bg-purple-500/10 text-purple-600 hover:bg-purple-500/20 cursor-pointer transition-colors"
+          >
+            <Network className="h-3 w-3" />
+            <span className="hidden sm:inline">Network</span>
           </Badge>
         </Link>
 
