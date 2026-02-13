@@ -111,8 +111,10 @@ export function NetworkGraph({
   }, [dimensions, redraw]);
 
   // Transform activities into graph data
+  // Must depend on dimensions too — simulation only exists after canvas has size
   useEffect(() => {
     if (activities.length === 0) return;
+    if (dimensions.width === 0 || dimensions.height === 0) return;
 
     const graphData = transformActivitiesToGraph(
       activities,
@@ -127,7 +129,7 @@ export function NetworkGraph({
     setDisplayEdges([...graphData.edges]);
     simulationAPI.updateGraph(graphData);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activities]);
+  }, [activities, dimensions.width, dimensions.height]);
 
   // Redraw when filters or hover change
   useEffect(() => {
