@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { TrendingUp, MessageCircle, HandCoins, Flame } from "lucide-react";
-import { getSpotlight } from "@/lib/api/endpoints";
+import { getSpotlight, getListingById } from "@/lib/api/endpoints";
 import { MarketplaceHeader } from "@/components/marketplace-header";
 import {
   CategorySidebar,
@@ -165,17 +165,29 @@ export default function MarketplacePage() {
                   </h2>
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                     {[
-                      { data: spotlight.mostDiscussed, label: "Most Discussed", icon: <MessageCircle className="h-3 w-3" /> },
-                      { data: spotlight.mostNegotiated, label: "Most Negotiated", icon: <HandCoins className="h-3 w-3" /> },
-                      { data: spotlight.fastestRising, label: "Fastest Rising", icon: <TrendingUp className="h-3 w-3" /> },
+                      { data: spotlight.mostDiscussed, label: "Most Discussed", icon: <MessageCircle className="h-3 w-3" />, type: "listing" as const },
+                      { data: spotlight.mostNegotiated, label: "Most Negotiated", icon: <HandCoins className="h-3 w-3" />, type: "listing" as const },
+                      { data: spotlight.fastestRising, label: "Fastest Rising", icon: <TrendingUp className="h-3 w-3" />, type: "store" as const },
                     ].filter(s => s.data).map((item) => (
                       <button
                         key={item.label}
-                        onClick={() => {
+                        onClick={async () => {
+                          if (item.type === "store" && item.data?.store_id) {
+                            // Navigate to store filter
+                            setSelectedStore(item.data.store_id);
+                            return;
+                          }
                           const lid = item.data?.listing_id;
-                          if (lid) {
-                            const found = listings.find(l => l.id === lid);
-                            if (found) setSelectedListing(found);
+                          if (!lid) return;
+                          // Try from current page first, otherwise fetch directly
+                          const found = listings.find(l => l.id === lid);
+                          if (found) {
+                            setSelectedListing(found);
+                          } else {
+                            try {
+                              const fetched = await getListingById(lid);
+                              setSelectedListing(fetched as unknown as Listing);
+                            } catch { /* listing may have been removed */ }
                           }
                         }}
                         className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 text-left transition-all hover:shadow-md hover:border-primary/30"
