@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { Activity, ChevronDown, RefreshCw } from "lucide-react";
+import { Activity, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -132,10 +131,7 @@ export function ActivityFeed({
   onClickListing?: (listingId: string) => void;
   onClickStore?: (storeId: string) => void;
 }) {
-  const [isExpanded, setIsExpanded] = useState(false);
   const { activities, loading, error, refetch } = useActivity(limit);
-
-  const displayActivities = isExpanded ? activities : activities.slice(0, 5);
 
   return (
     <Card className="w-full">
@@ -176,7 +172,7 @@ export function ActivityFeed({
           <>
             <ScrollArea className="h-[400px] pr-4">
               <div className="space-y-3">
-                {displayActivities.map((activity) => {
+                {activities.map((activity) => {
                   const href = activity.listing_id
                     ? `/listing/${activity.listing_id}`
                     : activity.store_id
@@ -233,22 +229,6 @@ export function ActivityFeed({
                 })}
               </div>
             </ScrollArea>
-
-            {activities.length > 5 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="mt-3 w-full"
-                onClick={() => setIsExpanded(!isExpanded)}
-              >
-                {isExpanded ? "Show Less" : `Show All (${activities.length})`}
-                <ChevronDown
-                  className={`ml-1 h-4 w-4 transition-transform ${
-                    isExpanded ? "rotate-180" : ""
-                  }`}
-                />
-              </Button>
-            )}
           </>
         )}
       </CardContent>
