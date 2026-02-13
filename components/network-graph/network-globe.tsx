@@ -161,23 +161,28 @@ export function NetworkGlobe({ onNavigateToStore }: NetworkGlobeProps) {
       if (!actorId || !storeId) continue;
 
       const ownerId = storeOwnerMap.get(storeId);
-      if (!ownerId || actorId === ownerId) continue;
+      if (!ownerId) continue;
 
       const actorLoc = agentLocationMap.get(actorId);
       const ownerLoc = agentLocationMap.get(ownerId);
       if (!actorLoc || !ownerLoc) continue;
 
+      // Self-action (merchant on own store): show as a short local arc
+      const isSelfAction = actorId === ownerId;
+      const endLat = isSelfAction ? actorLoc.lat + (Math.random() - 0.5) * 3 : ownerLoc.lat;
+      const endLng = isSelfAction ? actorLoc.lng + (Math.random() - 0.5) * 3 : ownerLoc.lng;
+
       newArcs.push({
         id: activity.id,
         startLat: actorLoc.lat,
         startLng: actorLoc.lng,
-        endLat: ownerLoc.lat,
-        endLng: ownerLoc.lng,
+        endLat,
+        endLng,
         activityType: activity.type,
         color: getActivityColor(activity.type),
-        stroke: 1.2,
+        stroke: isSelfAction ? 0.8 : 1.2,
         actorName: actorLoc.name,
-        targetName: ownerLoc.name,
+        targetName: isSelfAction ? actorLoc.name : ownerLoc.name,
         phase: "live",
       });
     }
