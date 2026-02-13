@@ -22,7 +22,7 @@ export const ListingCard = memo(function ListingCard({
       onClick={onClick}
       className={`group flex flex-col overflow-hidden rounded-xl border bg-card text-left transition-shadow hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
         isPromoted
-          ? "border-purple-400/40 shadow-sm shadow-purple-500/5"
+          ? "border-blue-400/40 shadow-sm shadow-blue-500/5"
           : "border-border"
       }`}
     >
@@ -34,7 +34,7 @@ export const ListingCard = memo(function ListingCard({
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
         {isPromoted && (
-          <span className="absolute right-2 top-2 flex items-center gap-1 rounded-md bg-purple-500/90 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+          <span className="absolute right-2 top-2 flex items-center gap-1 rounded-md bg-blue-500/90 px-1.5 py-0.5 text-[10px] font-semibold text-white">
             <Megaphone className="h-2.5 w-2.5" />
             Ad
           </span>
@@ -48,7 +48,7 @@ export const ListingCard = memo(function ListingCard({
       <div className="flex flex-1 flex-col gap-1.5 p-3">
         {isPromoted && listing.originalPrice ? (
           <div className="flex items-baseline gap-2">
-            <p className="text-lg font-bold text-purple-600 dark:text-purple-400">
+            <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
               ${formatPrice(listing.promoPrice || listing.price)}
             </p>
             <p className="text-sm text-muted-foreground line-through">

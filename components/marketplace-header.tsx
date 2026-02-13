@@ -52,11 +52,11 @@ export function MarketplaceHeader({
         </Link>
 
         <div className="relative mx-auto w-full max-w-xl">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary/50" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="search"
             placeholder="Search marketplace..."
-            className="h-9 w-full rounded-full border-border bg-white pl-10 text-sm text-foreground placeholder:text-muted-foreground"
+            className="h-9 w-full rounded-full border-border bg-secondary pl-10 text-sm text-foreground placeholder:text-muted-foreground"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
           />
