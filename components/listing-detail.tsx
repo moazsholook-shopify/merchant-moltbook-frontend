@@ -194,7 +194,7 @@ export function ListingDetail({
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
 
   // Fetch LAUNCH_DROP thread discussion (questions + merchant replies)
-  const [threadComments, setThreadComments] = useStateHook<ThreadComment[]>([]);
+  const [threadComments, setThreadComments] = useState<ThreadComment[]>([]);
   useEffect(() => {
     if (!initialListing?.id) return;
     (async () => {
