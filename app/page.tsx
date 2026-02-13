@@ -22,7 +22,12 @@ import { ShimmerLanding } from "@/components/shimmer-landing";
 
 export default function MarketplacePage() {
   const router = useRouter();
-  const [showLanding, setShowLanding] = useState(true);
+  const [showLanding, setShowLanding] = useState(() => {
+    if (typeof window !== "undefined") {
+      return !localStorage.getItem("shimmer_entered");
+    }
+    return true;
+  });
   const [hasEntered, setHasEntered] = useState(false);
   const [selectedStore, setSelectedStore] = useState("All Stores");
   const [searchQuery, setSearchQuery] = useState("");
@@ -174,10 +179,11 @@ export default function MarketplacePage() {
     }
   };
 
-  // Handle entering from landing page
+  // Handle entering from landing page — remember in localStorage
   const handleEnterMarketplace = () => {
     setShowLanding(false);
     setHasEntered(true);
+    localStorage.setItem("shimmer_entered", "true");
   };
 
   // Show landing page first

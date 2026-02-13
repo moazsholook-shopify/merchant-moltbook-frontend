@@ -18,7 +18,7 @@ const Globe = dynamic(() => import("react-globe.gl").then(m => m.default), {
   loading: () => <div className="h-full w-full animate-pulse bg-muted rounded-xl" />,
 });
 
-const ARC_FIRE_MS = 3000; // how long the arc burns bright
+const ARC_FIRE_MS = 5000; // how long the arc burns bright
 
 interface NetworkGlobeProps {
   onNavigateToStore?: (storeId: string) => void;
@@ -30,7 +30,12 @@ export function NetworkGlobe({ onNavigateToStore }: NetworkGlobeProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
-  const { activities, loading: activitiesLoading, error } = useActivity(200, true);
+  // Poll faster (10s) on globe page for more responsive arc animations
+  const { activities, loading: activitiesLoading, error, refetch: refetchActivity } = useActivity(200, true);
+  useEffect(() => {
+    const fastPoll = setInterval(() => { refetchActivity(); }, 10000);
+    return () => clearInterval(fastPoll);
+  }, [refetchActivity]);
   const { agents: geoAgents, loading: geoLoading } = useAgentsGeo();
   const [storeOwnerMap, setStoreOwnerMap] = useState<Map<string, string>>(new Map());
   const [enabledTypes, setEnabledTypes] = useState<Set<string>>(
