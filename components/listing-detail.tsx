@@ -193,6 +193,7 @@ export function ListingDetail({
   const { negotiations: offerNegotiations } = useListingOffers(initialListing?.id || null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
+  const [relatedSlideIndex, setRelatedSlideIndex] = useState(0);
 
   // Fetch LAUNCH_DROP thread discussion (questions + merchant replies)
   const [threadComments, setThreadComments] = useState<ThreadComment[]>([]);
@@ -350,6 +351,58 @@ export function ListingDetail({
                 ))}
               </div>
             )}
+
+            {/* More from this store — slider, hidden on small screens */}
+            {relatedListings.length > 0 && (
+              <div className="hidden md:block p-3 border-t border-border">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-xs font-semibold text-muted-foreground">
+                    More from {displayListing.merchant.name}
+                  </h3>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={() => setRelatedSlideIndex(i => Math.max(0, i - 2))}
+                      disabled={relatedSlideIndex === 0}
+                    >
+                      <ChevronLeft className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={() => setRelatedSlideIndex(i => Math.min(relatedListings.length - 2, i + 2))}
+                      disabled={relatedSlideIndex >= relatedListings.length - 2}
+                    >
+                      <ChevronRight className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {relatedListings.slice(relatedSlideIndex, relatedSlideIndex + 2).map(rl => (
+                    <Link
+                      key={rl.id}
+                      href={`/listing/${rl.id}`}
+                      className="group overflow-hidden rounded-lg border border-border bg-secondary/30 transition-all hover:shadow-md hover:border-primary/20"
+                    >
+                      <div className="relative aspect-square w-full overflow-hidden bg-muted">
+                        <img
+                          src={rl.image || "/placeholder.svg"}
+                          alt={rl.title}
+                          className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                      </div>
+                      <div className="p-2">
+                        <p className="text-xs font-bold text-foreground">${formatPrice(rl.price)}</p>
+                        <p className="text-xs text-muted-foreground truncate">{rl.title}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
           <div className="flex flex-1 flex-col gap-4 p-6">
             <div>
@@ -431,36 +484,6 @@ export function ListingDetail({
               </p>
             </div>
 
-            {/* More from this store */}
-            {relatedListings.length > 0 && (
-              <div>
-                <Separator className="mb-4" />
-                <h2 className="mb-3 text-sm font-semibold text-foreground">
-                  More from {displayListing.merchant.name}
-                </h2>
-                <div className="grid grid-cols-2 gap-2">
-                  {relatedListings.map(rl => (
-                    <Link
-                      key={rl.id}
-                      href={`/listing/${rl.id}`}
-                      className="group overflow-hidden rounded-lg border border-border bg-secondary/30 transition-all hover:shadow-md hover:border-primary/20"
-                    >
-                      <div className="relative aspect-square w-full overflow-hidden bg-muted">
-                        <img
-                          src={rl.image || "/placeholder.svg"}
-                          alt={rl.title}
-                          className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
-                      </div>
-                      <div className="p-2">
-                        <p className="text-xs font-bold text-foreground">${formatPrice(rl.price)}</p>
-                        <p className="text-xs text-muted-foreground truncate">{rl.title}</p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </div>
 
