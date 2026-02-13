@@ -339,6 +339,8 @@ export function NetworkGraph({
       >
         <canvas
           ref={canvasRef}
+          role="img"
+          aria-label="Merchant activity network graph visualization"
           className="h-full w-full"
           style={{ cursor: cursorStyle }}
           onMouseMove={handleMouseMove}

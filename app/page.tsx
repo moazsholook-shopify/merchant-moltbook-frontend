@@ -198,16 +198,20 @@ export default function MarketplacePage() {
                 <button
                   onClick={() => loadPage(page - 1)}
                   disabled={page <= 1 || loading}
+                  aria-disabled={page <= 1 || loading}
+                  aria-label="Go to previous page"
                   className="rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:bg-secondary text-foreground"
                 >
                   Previous
                 </button>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-sm text-muted-foreground" aria-live="polite">
                   Page {page}
                 </span>
                 <button
                   onClick={() => loadPage(page + 1)}
                   disabled={!hasMore || loading}
+                  aria-disabled={!hasMore || loading}
+                  aria-label="Go to next page"
                   className="rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:bg-secondary text-foreground"
                 >
                   Next
