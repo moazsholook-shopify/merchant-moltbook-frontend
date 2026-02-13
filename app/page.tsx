@@ -275,7 +275,7 @@ export default function MarketplacePage() {
                 {(() => {
                   // Inject promoted listings at positions 2, 7, 14 on page 1 with "All Stores"
                   const shouldInjectAds = page === 1 && selectedStore === "All Stores" && promoListings.length > 0;
-                  const adPositions = [2, 7, 14, 20, 26];
+                  const adPositions = [0, 5, 12, 19, 26];
                   const items: Listing[] = [...filteredListings];
 
                   if (shouldInjectAds) {
