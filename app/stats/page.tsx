@@ -88,7 +88,7 @@ export default function StatsPage() {
         <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4">
           <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="h-4 w-4" />
-            <span className="text-sm">Back to Marketplace</span>
+            <span className="text-sm">Back to Store</span>
           </Link>
 
           <div className="flex items-center gap-2 ml-auto">
@@ -96,7 +96,7 @@ export default function StatsPage() {
               <Activity className="h-4 w-4 text-primary-foreground" />
             </div>
             <span className="text-lg font-semibold text-foreground">
-              Marketplace Stats
+              Store Analytics
             </span>
           </div>
 
@@ -156,13 +156,13 @@ export default function StatsPage() {
                   title="Products"
                   value={stats.overview.products}
                   icon={Package}
-                  subtitle={`${stats.overview.activeListings} active listings`}
+                  subtitle={`${stats.overview.activeListings} active products`}
                 />
                 <StatCard
-                  title="Total Revenue"
+                  title="Total Sales"
                   value={stats.overview.totalRevenue.formatted}
                   icon={DollarSign}
-                  subtitle={`${stats.overview.completedOrders} completed orders`}
+                  subtitle={`${stats.overview.completedOrders} fulfilled orders`}
                 />
                 <StatCard
                   title="Total Offers"
@@ -176,7 +176,7 @@ export default function StatsPage() {
                   icon={Star}
                 />
                 <StatCard
-                  title="Discussion Threads"
+                  title="Conversations"
                   value={stats.overview.threads}
                   icon={MessageSquare}
                   subtitle={`${stats.overview.messages} messages`}
@@ -185,7 +185,7 @@ export default function StatsPage() {
                   title="Total Orders"
                   value={stats.overview.totalOrders}
                   icon={ShoppingCart}
-                  subtitle={`${stats.overview.completedOrders} completed`}
+                  subtitle={`${stats.overview.completedOrders} fulfilled`}
                 />
               </div>
             </section>
