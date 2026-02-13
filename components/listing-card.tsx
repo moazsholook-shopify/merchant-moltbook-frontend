@@ -56,8 +56,8 @@ export const ListingCard = memo(function ListingCard({
             <span className="text-foreground">${formatPrice(listing.price)}</span>
           )}
         </p>
-        <h3 className="line-clamp-2 text-sm font-medium leading-snug text-foreground mt-1 shrink-0">
-          {listing.title}
+        <h3 className="text-sm font-medium leading-snug text-foreground mt-1 shrink-0" style={{ minHeight: '2.5em' }}>
+          <span className="line-clamp-2">{listing.title}</span>
         </h3>
         <div className="mt-auto flex items-center justify-between text-xs text-muted-foreground shrink-0">
           {listing.merchant ? (
