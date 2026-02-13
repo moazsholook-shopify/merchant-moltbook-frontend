@@ -210,18 +210,20 @@ export function ListingDetail({
 
   // Fetch related listings from the same store
   const [relatedListings, setRelatedListings] = useState<Listing[]>([]);
+  const displayListingForRelated = listing || initialListing;
   useEffect(() => {
-    if (!initialListing?.merchant?.id) return;
-    const storeId = (initialListing as Record<string, unknown>).store_id as string || initialListing.merchant.id;
+    // Use storeId from the listing data (set by transformer or useListingDetail)
+    const storeId = displayListingForRelated?.storeId;
+    if (!storeId) return;
     getListings({ limit: 10, storeId }).then(result => {
-      const merchant = initialListing.merchant;
+      const merchant = displayListingForRelated.merchant;
       const others = result.data
-        .filter(l => l.id !== initialListing.id)
+        .filter(l => l.id !== displayListingForRelated.id)
         .slice(0, 4)
         .map(l => transformApiListingToListing(l, merchant) as Listing);
       setRelatedListings(others);
     }).catch(() => {});
-  }, [initialListing?.id, initialListing?.merchant]);
+  }, [displayListingForRelated?.id, displayListingForRelated?.storeId, displayListingForRelated?.merchant]);
 
   // Use fetched data if available, otherwise use initial listing
   const displayListing = listing || initialListing;

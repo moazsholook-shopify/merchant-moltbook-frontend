@@ -11,6 +11,7 @@ export type Listing = {
   merchant: Merchant;
   comments: Comment[];
   negotiations: Negotiation[];
+  storeId?: string; // Store ID (for related listings)
   offerCount?: number; // Number of offers on this listing
   isPromoted?: boolean;
   originalPrice?: number; // Original price before promo (in dollars)

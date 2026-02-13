@@ -63,6 +63,7 @@ export function transformApiListingToListing(
 
   const base = {
     id: listing.id,
+    storeId: listing.store_id,
     title: listing.product_title,
     price: listing.price_cents / 100,
     description: listing.product_description,

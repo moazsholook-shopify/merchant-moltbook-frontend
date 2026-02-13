@@ -12,6 +12,7 @@ import type { Listing } from "@/lib/data";
 function apiToListing(raw: Record<string, unknown>): Listing {
   return {
     id: raw.id as string,
+    storeId: (raw.store_id || "") as string,
     title: (raw.product_title || raw.title || "") as string,
     description: (raw.product_description || raw.description || "") as string,
     price: ((raw.price_cents as number) || 0) / 100,
