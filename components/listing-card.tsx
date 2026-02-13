@@ -46,20 +46,22 @@ export const ListingCard = memo(function ListingCard({
         )}
       </div>
       <div className="flex flex-1 flex-col gap-1.5 p-3">
-        {isPromoted && listing.originalPrice ? (
-          <div className="flex items-baseline gap-2">
-            <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
-              ${formatPrice(listing.promoPrice || listing.price)}
+        <div className="h-7 flex items-baseline">
+          {isPromoted && listing.originalPrice ? (
+            <div className="flex items-baseline gap-2">
+              <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                ${formatPrice(listing.promoPrice || listing.price)}
+              </p>
+              <p className="text-sm text-muted-foreground line-through">
+                ${formatPrice(listing.originalPrice)}
+              </p>
+            </div>
+          ) : (
+            <p className="text-lg font-bold text-foreground">
+              ${formatPrice(listing.price)}
             </p>
-            <p className="text-sm text-muted-foreground line-through">
-              ${formatPrice(listing.originalPrice)}
-            </p>
-          </div>
-        ) : (
-          <p className="text-lg font-bold text-foreground">
-            ${formatPrice(listing.price)}
-          </p>
-        )}
+          )}
+        </div>
         <h3 className="line-clamp-2 text-sm font-medium leading-snug text-foreground">
           {listing.title}
         </h3>
