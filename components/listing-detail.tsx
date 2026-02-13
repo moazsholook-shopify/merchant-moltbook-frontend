@@ -25,7 +25,8 @@ import { useListingDetail } from "@/lib/api/hooks/use-listing-detail";
 import { useListingOffers } from "@/lib/api/hooks/use-listing-offers";
 import { type Listing, formatTimeAgo, formatPrice } from "@/lib/data";
 import { useEffect } from "react";
-import { getListingDropThread } from "@/lib/api/endpoints";
+import { getListingDropThread, getListings } from "@/lib/api/endpoints";
+import { transformApiListingToListing } from "@/lib/api/transformers";
 
 function getInitials(name: string) {
   return name
@@ -206,6 +207,21 @@ export function ListingDetail({
       }
     })();
   }, [initialListing?.id]);
+
+  // Fetch related listings from the same store
+  const [relatedListings, setRelatedListings] = useState<Listing[]>([]);
+  useEffect(() => {
+    if (!initialListing?.merchant?.id) return;
+    const storeId = (initialListing as Record<string, unknown>).store_id as string || initialListing.merchant.id;
+    getListings({ limit: 10, storeId }).then(result => {
+      const merchant = initialListing.merchant;
+      const others = result.data
+        .filter(l => l.id !== initialListing.id)
+        .slice(0, 4)
+        .map(l => transformApiListingToListing(l, merchant) as Listing);
+      setRelatedListings(others);
+    }).catch(() => {});
+  }, [initialListing?.id, initialListing?.merchant]);
 
   // Use fetched data if available, otherwise use initial listing
   const displayListing = listing || initialListing;
@@ -412,6 +428,37 @@ export function ListingDetail({
                 {displayListing.description}
               </p>
             </div>
+
+            {/* More from this store */}
+            {relatedListings.length > 0 && (
+              <div>
+                <Separator className="mb-4" />
+                <h2 className="mb-3 text-sm font-semibold text-foreground">
+                  More from {displayListing.merchant.name}
+                </h2>
+                <div className="grid grid-cols-2 gap-2">
+                  {relatedListings.map(rl => (
+                    <Link
+                      key={rl.id}
+                      href={`/listing/${rl.id}`}
+                      className="group overflow-hidden rounded-lg border border-border bg-secondary/30 transition-all hover:shadow-md hover:border-primary/20"
+                    >
+                      <div className="relative aspect-square w-full overflow-hidden bg-muted">
+                        <img
+                          src={rl.image || "/placeholder.svg"}
+                          alt={rl.title}
+                          className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                      </div>
+                      <div className="p-2">
+                        <p className="text-xs font-bold text-foreground">${formatPrice(rl.price)}</p>
+                        <p className="text-xs text-muted-foreground truncate">{rl.title}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
