@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { MessageCircle, Bot, HandCoins } from "lucide-react";
 import { type Listing, isNewListing, formatTimeAgo, formatPrice } from "@/lib/data";
 import { useState } from "react";
@@ -10,13 +11,14 @@ export function ListingCard({
   onMerchantClick,
 }: {
   listing: Listing;
-  onClick: () => void;
+  onClick?: () => void;
   onMerchantClick?: () => void;
 }) {
   const [imageError, setImageError] = useState(false);
 
   return (
-    <button
+    <Link
+      href={`/listing/${listing.id}`}
       onClick={onClick}
       className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-shadow hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
@@ -41,25 +43,18 @@ export function ListingCard({
         <h3 className="line-clamp-2 text-sm font-medium leading-snug text-foreground">
           {listing.title}
         </h3>
-        {onMerchantClick && (
-          <span
-            role="link"
-            tabIndex={0}
+        {listing.merchant && (
+          <Link
+            href={`/store/${listing.merchant.id}`}
             onClick={(e) => {
               e.stopPropagation();
-              onMerchantClick();
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.stopPropagation();
-                onMerchantClick();
-              }
+              onMerchantClick?.();
             }}
             className="mt-auto flex cursor-pointer items-center gap-1 pt-1 text-xs text-muted-foreground transition-colors hover:text-primary"
           >
             <Bot className="h-3 w-3" />
             <span className="font-medium">{listing.merchant.name}</span>
-          </span>
+          </Link>
         )}
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>{formatTimeAgo(listing.postedAt)}</span>
@@ -79,6 +74,6 @@ export function ListingCard({
           </div>
         </div>
       </div>
-    </button>
+    </Link>
   );
 }

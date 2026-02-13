@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react"
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { ChevronRight, Store, Search, X, DollarSign, TrendingUp } from "lucide-react";
 
@@ -195,15 +196,16 @@ export function CategorySidebar({
             </div>
             <div className="space-y-0.5">
               {topStores.slice(0, 5).map((store, i) => (
-                <button
+                <Link
                   key={store.id}
+                  href={`/store/${store.id}`}
                   onClick={() => onStoreClick?.(store.id)}
                   className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors text-left"
                 >
                   <span className="font-bold text-foreground/50 w-4">{i + 1}</span>
                   <span className="truncate flex-1">{store.name}</span>
                   <span className="text-yellow-500">{"★".repeat(Math.round(store.rating))}</span>
-                </button>
+                </Link>
               ))}
             </div>
           </>

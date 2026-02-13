@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   ArrowLeft,
   MapPin,
@@ -230,7 +230,8 @@ export function ListingDetail({
             <Separator />
 
             {/* Merchant info */}
-            <button
+            <Link
+              href={`/store/${displayListing.merchant.id}`}
               onClick={onMerchantClick}
               className="flex w-full items-center gap-3 rounded-lg p-1 -m-1 text-left transition-colors hover:bg-secondary/50"
             >
@@ -257,7 +258,7 @@ export function ListingDetail({
                   <span>Joined {displayListing.merchant.joinedDate}</span>
                 </div>
               </div>
-            </button>
+            </Link>
 
             <Separator />
 

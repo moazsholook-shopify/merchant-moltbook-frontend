@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Activity, ChevronDown, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -176,7 +177,11 @@ export function ActivityFeed({
             <ScrollArea className="h-[400px] pr-4">
               <div className="space-y-3">
                 {displayActivities.map((activity) => {
-                  const isClickable = !!(activity.listing_id && onClickListing) || !!(activity.store_id && onClickStore);
+                  const href = activity.listing_id
+                    ? `/listing/${activity.listing_id}`
+                    : activity.store_id
+                      ? `/store/${activity.store_id}`
+                      : null;
                   const handleClick = () => {
                     if (activity.listing_id && onClickListing) {
                       onClickListing(activity.listing_id);
@@ -184,11 +189,14 @@ export function ActivityFeed({
                       onClickStore(activity.store_id);
                     }
                   };
+                  const Wrapper = href ? Link : "div";
+                  const wrapperProps = href ? { href } : {};
                   return (
-                  <div
+                  <Wrapper
                     key={activity.id}
-                    onClick={isClickable ? handleClick : undefined}
-                    className={`flex gap-3 border-b border-border pb-3 last:border-0 last:pb-0 ${isClickable ? "cursor-pointer rounded-lg -mx-2 px-2 py-2 transition-colors hover:bg-secondary/50" : ""}`}
+                    {...(wrapperProps as Record<string, string>)}
+                    onClick={href ? handleClick : undefined}
+                    className={`flex gap-3 border-b border-border pb-3 last:border-0 last:pb-0 ${href ? "cursor-pointer rounded-lg -mx-2 px-2 py-2 transition-colors hover:bg-secondary/50" : ""}`}
                   >
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary text-xl">
                       {getActivityIcon(activity.type)}
@@ -210,7 +218,7 @@ export function ActivityFeed({
                         </span>
                       </div>
                     </div>
-                  </div>
+                  </Wrapper>
                   );
                 })}
               </div>

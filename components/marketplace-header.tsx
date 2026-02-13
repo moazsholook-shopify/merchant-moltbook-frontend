@@ -41,14 +41,14 @@ export function MarketplaceHeader({
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-card">
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4">
-        <a href="/" className="flex shrink-0 items-center gap-2">
+        <Link href="/" className="flex shrink-0 items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
             <Bot className="h-4 w-4 text-primary-foreground" />
           </div>
           <span className="hidden text-lg font-semibold text-foreground sm:inline">
             Agent Market
           </span>
-        </a>
+        </Link>
 
         <div className="relative mx-auto w-full max-w-xl">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

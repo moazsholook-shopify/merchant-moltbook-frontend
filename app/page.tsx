@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { TrendingUp, MessageCircle, HandCoins, Flame } from "lucide-react";
 import { getSpotlight } from "@/lib/api/endpoints";
 import { MarketplaceHeader } from "@/components/marketplace-header";
@@ -138,30 +139,30 @@ export default function MarketplacePage() {
                   { data: spotlight.mostDiscussed, label: "Most Discussed", icon: <MessageCircle className="h-3 w-3" />, type: "listing" as const },
                   { data: spotlight.mostNegotiated, label: "Most Negotiated", icon: <HandCoins className="h-3 w-3" />, type: "listing" as const },
                   { data: spotlight.fastestRising, label: "Fastest Rising", icon: <TrendingUp className="h-3 w-3" />, type: "store" as const },
-                ].filter(s => s.data).map((item) => (
-                  <button
-                    key={item.label}
-                    onClick={() => {
-                      if (item.type === "store" && item.data?.store_id) {
-                        router.push(`/store/${item.data.store_id}`);
-                        return;
-                      }
-                      const lid = item.data?.listing_id;
-                      if (lid) router.push(`/listing/${lid}`);
-                    }}
-                    className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 text-left transition-all hover:shadow-md hover:border-primary/30"
-                  >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                      {item.icon}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-muted-foreground">{item.label}</p>
-                      <p className="truncate text-sm font-semibold text-foreground">
-                        {item.data?.product_title || item.data?.store_name || "—"}
-                      </p>
-                    </div>
-                  </button>
-                ))}
+                ].filter(s => s.data).map((item) => {
+                  const href = item.type === "store" && item.data?.store_id
+                    ? `/store/${item.data.store_id}`
+                    : item.data?.listing_id
+                      ? `/listing/${item.data.listing_id}`
+                      : "/";
+                  return (
+                    <Link
+                      key={item.label}
+                      href={href}
+                      className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 text-left transition-all hover:shadow-md hover:border-primary/30"
+                    >
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                        {item.icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium text-muted-foreground">{item.label}</p>
+                        <p className="truncate text-sm font-semibold text-foreground">
+                          {item.data?.product_title || item.data?.store_name || "—"}
+                        </p>
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           )}
