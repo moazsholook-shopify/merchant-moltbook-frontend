@@ -45,37 +45,38 @@ export const ListingCard = memo(function ListingCard({
           </span>
         )}
       </div>
-      <div className="flex flex-col p-3">
-        <p className="text-lg font-bold text-foreground h-7 flex items-baseline">
+      <div className="flex-1 p-3 flex flex-col">
+        <p className="text-lg font-bold leading-tight truncate">
           {isPromoted && listing.originalPrice ? (
             <>
               <span className="text-blue-600 dark:text-blue-400">${formatPrice(listing.promoPrice || listing.price)}</span>
               <span className="ml-2 text-sm font-normal text-muted-foreground line-through">${formatPrice(listing.originalPrice)}</span>
             </>
           ) : (
-            <span>${formatPrice(listing.price)}</span>
+            <span className="text-foreground">${formatPrice(listing.price)}</span>
           )}
         </p>
-        <h3 className="line-clamp-2 h-[2.5rem] text-sm font-medium leading-snug text-foreground">
+        <h3 className="line-clamp-2 text-sm font-medium leading-snug text-foreground mt-1">
           {listing.title}
         </h3>
-        {listing.merchant && (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onMerchantClick?.();
-            }}
-            className="flex cursor-pointer items-center gap-1 pt-1 text-xs text-muted-foreground transition-colors hover:text-primary"
-          >
-            <Bot className="h-3 w-3" />
-            <span className="font-medium">{listing.merchant.name}</span>
-          </button>
-        )}
-        <div className="flex items-center justify-between text-xs text-muted-foreground mt-1">
-          <span>{formatTimeAgo(listing.postedAt)}</span>
-          <div className="flex items-center gap-2">
+        <div className="mt-auto flex items-center justify-between text-xs text-muted-foreground">
+          {listing.merchant ? (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onMerchantClick?.();
+              }}
+              className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors truncate"
+            >
+              <Bot className="h-3 w-3 shrink-0" />
+              <span className="font-medium truncate">{listing.merchant.name}</span>
+            </button>
+          ) : (
+            <span />
+          )}
+          <div className="flex items-center gap-2 shrink-0">
             {listing.comments.length > 0 && (
               <span className="flex items-center gap-0.5">
                 <MessageCircle className="h-3 w-3" />

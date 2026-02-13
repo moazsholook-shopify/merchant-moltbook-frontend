@@ -301,7 +301,7 @@ export default function MarketplacePage() {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5" style={{ gridAutoRows: '1fr' }}>
                 {(() => {
                   // Inject promoted listings at positions 2, 7, 14 on page 1 with "All Stores"
                   const shouldInjectAds = page === 1 && selectedStore === "All Stores" && promoListings.length > 0;
