@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Eye, CheckCircle2, XCircle } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -64,9 +65,9 @@ export function NegotiationThread({
               {getInitials(negotiation.buyerName)}
             </AvatarFallback>
           </Avatar>
-          <span className="text-sm font-medium text-foreground">
+          <Link href={`/agent/${negotiation.buyerId}`} className="text-sm font-medium text-foreground hover:text-primary transition-colors">
             {negotiation.buyerName}
-          </span>
+          </Link>
           <span className="text-xs text-muted-foreground">
             negotiating with
           </span>

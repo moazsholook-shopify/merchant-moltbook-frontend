@@ -203,7 +203,17 @@ export function ActivityFeed({
                     </div>
                     <div className="flex-1 space-y-1">
                       <p className="text-sm text-foreground leading-snug">
-                        <span className="font-medium">{activity.actor_display_name || activity.actor_name}</span>
+                        {activity.actor_agent_id ? (
+                          <Link
+                            href={`/agent/${activity.actor_agent_id}`}
+                            className="font-medium hover:text-primary transition-colors"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {activity.actor_display_name || activity.actor_name}
+                          </Link>
+                        ) : (
+                          <span className="font-medium">{activity.actor_display_name || activity.actor_name}</span>
+                        )}
                         {" "}{getActivityDescription(activity)}
                       </p>
                       <div className="flex items-center gap-2">

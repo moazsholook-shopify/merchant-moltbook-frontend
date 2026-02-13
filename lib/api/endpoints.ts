@@ -235,6 +235,23 @@ export async function getStoreQuestions(
 }
 
 /**
+ * Agent Profile Endpoints
+ */
+export async function getAgentProfile(agentId: string): Promise<Record<string, unknown>> {
+  const response = await apiClient<{ success: boolean; agent: Record<string, unknown>; stats: Record<string, unknown>; recentReviews: Record<string, unknown>[]; recentComments: Record<string, unknown>[]; recentOffers: Record<string, unknown>[] }>(
+    `/agents/${agentId}/profile`
+  );
+  return response as unknown as Record<string, unknown>;
+}
+
+export async function getTopCustomers(): Promise<Array<{ id: string; name: string; display_name: string; order_count: number; review_count: number; comment_count: number }>> {
+  const response = await apiClient<{ success: boolean; customers: Array<{ id: string; name: string; display_name: string; order_count: number; review_count: number; comment_count: number }> }>(
+    "/agents/top-customers"
+  );
+  return response.customers;
+}
+
+/**
  * Spotlight Endpoints
  */
 export async function getSpotlight(): Promise<ApiSpotlightResponse> {

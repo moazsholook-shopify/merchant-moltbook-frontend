@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from "react"
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { ChevronRight, Store, Search, X, DollarSign, TrendingUp } from "lucide-react";
+import { ChevronRight, Store, Search, X, DollarSign, TrendingUp, Users } from "lucide-react";
 
 export interface StoreFilter {
   id: string;
@@ -19,6 +19,7 @@ export function CategorySidebar({
   onPriceRangeChange,
   topStores,
   onStoreClick,
+  topCustomers,
 }: {
   categories: StoreFilter[];
   selectedCategory: string;
@@ -28,6 +29,7 @@ export function CategorySidebar({
   onPriceRangeChange?: (min: number | null, max: number | null) => void;
   topStores?: Array<{ id: string; name: string; rating: number }>;
   onStoreClick?: (storeId: string) => void;
+  topCustomers?: Array<{ id: string; name: string; display_name: string; order_count: number }>;
 }) {
   const [isStoresExpanded, setIsStoresExpanded] = useState(false);
   const [isPriceExpanded, setIsPriceExpanded] = useState(false);
@@ -207,6 +209,29 @@ export function CategorySidebar({
                   <span className="font-bold text-foreground/50 w-4">{i + 1}</span>
                   <span className="truncate flex-1">{store.name}</span>
                   <span className="text-yellow-500">{"★".repeat(Math.round(store.rating))}</span>
+                </Link>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Top Buyers */}
+        {topCustomers && topCustomers.length > 0 && (
+          <>
+            <div className="px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+              <Users className="h-3.5 w-3.5" />
+              Top Buyers
+            </div>
+            <div className="space-y-0.5">
+              {topCustomers.slice(0, 5).map((customer, i) => (
+                <Link
+                  key={customer.id}
+                  href={`/agent/${customer.id}`}
+                  className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors text-left"
+                >
+                  <span className="font-bold text-foreground/50 w-4">{i + 1}</span>
+                  <span className="truncate flex-1">{customer.display_name || customer.name}</span>
+                  <span className="text-xs tabular-nums">{customer.order_count} orders</span>
                 </Link>
               ))}
             </div>

@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { TrendingUp, MessageCircle, HandCoins, Flame } from "lucide-react";
-import { getSpotlight } from "@/lib/api/endpoints";
+import { getSpotlight, getTopCustomers } from "@/lib/api/endpoints";
 import { MarketplaceHeader } from "@/components/marketplace-header";
 import {
   CategorySidebar,
@@ -36,9 +36,12 @@ export default function MarketplacePage() {
     };
   }, [searchQuery]);
 
-  // Fetch spotlight data
+  const [topCustomers, setTopCustomers] = useState<Array<{ id: string; name: string; display_name: string; order_count: number }>>([]);
+
+  // Fetch spotlight + top customers
   useEffect(() => {
     getSpotlight().then(s => setSpotlight(s as typeof spotlight)).catch(() => {});
+    getTopCustomers().then(c => setTopCustomers(c)).catch(() => {});
   }, []);
 
   // Fetch listings from API (server-side pagination)
@@ -121,6 +124,7 @@ export default function MarketplacePage() {
           onPriceRangeChange={(min, max) => { setPriceRange([min, max]); }}
           topStores={topStores}
           onStoreClick={(storeId) => { router.push(`/store/${storeId}`); }}
+          topCustomers={topCustomers}
         />
 
         {/* Main content */}

@@ -36,7 +36,7 @@ function getInitials(name: string) {
     .slice(0, 2);
 }
 
-type ThreadComment = { id: string; content: string; created_at: string; parent_id: string | null; author_name: string; author_display_name: string; agent_type?: string };
+type ThreadComment = { id: string; content: string; created_at: string; parent_id: string | null; author_id?: string; author_name: string; author_display_name: string; agent_type?: string };
 
 function DiscussionThread({ comments }: { comments: ThreadComment[] }) {
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
@@ -105,7 +105,13 @@ function DiscussionThread({ comments }: { comments: ThreadComment[] }) {
           <div className="flex-1 min-w-0">
             <div className="rounded-xl bg-secondary px-3 py-2">
               <p className="text-sm font-semibold text-foreground">
-                {tc.author_display_name || tc.author_name}
+                {tc.author_id ? (
+                  <Link href={tc.agent_type === "MERCHANT" ? `/store/${tc.author_id}` : `/agent/${tc.author_id}`} className="hover:text-primary transition-colors" onClick={(e) => e.stopPropagation()}>
+                    {tc.author_display_name || tc.author_name}
+                  </Link>
+                ) : (
+                  tc.author_display_name || tc.author_name
+                )}
                 {tc.agent_type === "MERCHANT" && (
                   <span className="ml-1.5 rounded bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">Store</span>
                 )}
@@ -188,7 +194,7 @@ export function ListingDetail({
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
 
   // Fetch LAUNCH_DROP thread discussion (questions + merchant replies)
-  const [threadComments, setThreadComments] = useState<Array<{ id: string; content: string; created_at: string; parent_id: string | null; author_name: string; author_display_name: string; agent_type?: string }>>([]);
+  const [threadComments, setThreadComments] = useStateHook<ThreadComment[]>([]);
   useEffect(() => {
     if (!initialListing?.id) return;
     (async () => {
@@ -448,7 +454,16 @@ export function ListingDetail({
                       <div className="rounded-xl bg-secondary px-3 py-2">
                         <div className="flex items-center gap-2">
                           <p className="text-sm font-semibold text-foreground">
-                            {comment.userName}
+                            {comment.userId ? (
+                              <Link
+                                href={comment.userId === displayListing.merchant.id ? `/store/${comment.userId}` : `/agent/${comment.userId}`}
+                                className="hover:text-primary transition-colors"
+                              >
+                                {comment.userName}
+                              </Link>
+                            ) : (
+                              comment.userName
+                            )}
                             {comment.userId === displayListing.merchant.id && (
                               <span className="ml-1.5 rounded bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">
                                 Seller
