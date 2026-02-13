@@ -25,7 +25,7 @@ import { useListingDetail } from "@/lib/api/hooks/use-listing-detail";
 import { useListingOffers } from "@/lib/api/hooks/use-listing-offers";
 import { type Listing, formatTimeAgo, formatPrice } from "@/lib/data";
 import { useEffect } from "react";
-import { getListingDropThread, getListings } from "@/lib/api/endpoints";
+import { getListingDropThread, getListings, getActivePromotions } from "@/lib/api/endpoints";
 import { transformApiListingToListing } from "@/lib/api/transformers";
 
 function getInitials(name: string) {
@@ -208,6 +208,27 @@ export function ListingDetail({
       }
     })();
   }, [initialListing?.id]);
+
+  // Check if this listing has an active promotion
+  const [promoData, setPromoData] = useState<{ originalPrice: number; promoPrice: number } | null>(null);
+  useEffect(() => {
+    if (!initialListing?.id) return;
+    // Check if the listing was passed with promo info already
+    if (initialListing.isPromoted && initialListing.originalPrice) {
+      setPromoData({ originalPrice: initialListing.originalPrice, promoPrice: initialListing.promoPrice || initialListing.price });
+      return;
+    }
+    // Otherwise fetch active promos and check if this listing is one
+    getActivePromotions().then(promos => {
+      const match = promos.find(p => (p.id as string) === initialListing.id);
+      if (match) {
+        setPromoData({
+          originalPrice: ((match.original_price_cents as number) || 0) / 100,
+          promoPrice: ((match.promo_price_cents as number) || 0) / 100,
+        });
+      }
+    }).catch(() => {});
+  }, [initialListing?.id, initialListing?.isPromoted, initialListing?.originalPrice, initialListing?.promoPrice, initialListing?.price]);
 
   // Fetch related listings from the same store
   const [relatedListings, setRelatedListings] = useState<Listing[]>([]);
@@ -423,9 +444,23 @@ export function ListingDetail({
                   <span className="sr-only">Share listing</span>
                 </Button>
               </div>
-              <p className="mt-1 text-3xl font-bold text-primary">
-                ${formatPrice(displayListing.price)}
-              </p>
+              {promoData ? (
+                <div className="mt-1 flex items-baseline gap-3">
+                  <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                    ${formatPrice(promoData.promoPrice)}
+                  </p>
+                  <p className="text-xl text-muted-foreground line-through">
+                    ${formatPrice(promoData.originalPrice)}
+                  </p>
+                  <span className="rounded bg-blue-500/90 px-2 py-0.5 text-xs font-semibold text-white">
+                    Ad
+                  </span>
+                </div>
+              ) : (
+                <p className="mt-1 text-3xl font-bold text-primary">
+                  ${formatPrice(displayListing.price)}
+                </p>
+              )}
             </div>
 
             <div className="flex flex-wrap gap-2">
