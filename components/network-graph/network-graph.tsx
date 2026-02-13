@@ -37,7 +37,6 @@ export function NetworkGraph({
   const [displayEdges, setDisplayEdges] = useState<GraphEdge[]>([]);
 
   const existingNodesRef = useRef<Map<string, GraphNode>>(new Map());
-  const redrawLoggedRef = useRef(false);
   const dragNodeRef = useRef<GraphNode | null>(null);
   const isPanningRef = useRef(false);
   const panStartRef = useRef({ x: 0, y: 0 });
@@ -56,22 +55,11 @@ export function NetworkGraph({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const nodes = simulationAPI.nodesRef.current;
-    const edges = simulationAPI.edgesRef.current;
-
-    // Debug: log first few ticks
-    if (nodes.length > 0 && !redrawLoggedRef.current) {
-      console.log('[network] Drawing:', nodes.length, 'nodes,', edges.length, 'edges');
-      console.log('[network] Sample node:', nodes[0]?.id, 'x=', nodes[0]?.x, 'y=', nodes[0]?.y);
-      console.log('[network] Canvas size:', canvas.width, 'x', canvas.height, 'dims:', dimensions.width, 'x', dimensions.height);
-      redrawLoggedRef.current = true;
-    }
-
     const dpr = window.devicePixelRatio || 1;
     drawFrame({
       ctx,
-      nodes,
-      edges,
+      nodes: simulationAPI.nodesRef.current,
+      edges: simulationAPI.edgesRef.current,
       width: dimensions.width,
       height: dimensions.height,
       transform: transformRef.current,
@@ -94,7 +82,7 @@ export function NetworkGraph({
     onTick,
   });
 
-  // Resize observer
+  // Resize observer — must re-run after loading completes (container doesn't exist during skeleton)
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -103,12 +91,14 @@ export function NetworkGraph({
       const entry = entries[0];
       if (entry) {
         const { width, height } = entry.contentRect;
-        setDimensions({ width, height });
+        if (width > 0 && height > 0) {
+          setDimensions({ width, height });
+        }
       }
     });
     observer.observe(container);
     return () => observer.disconnect();
-  }, []);
+  }, [loading]);
 
   // Set canvas size for retina
   useEffect(() => {
@@ -125,21 +115,13 @@ export function NetworkGraph({
   // Transform activities into graph data
   // Must depend on dimensions too — simulation only exists after canvas has size
   useEffect(() => {
-    if (activities.length === 0) {
-      console.log('[network] No activities yet');
-      return;
-    }
-    if (dimensions.width === 0 || dimensions.height === 0) {
-      console.log('[network] Dimensions not ready:', dimensions);
-      return;
-    }
+    if (activities.length === 0) return;
+    if (dimensions.width === 0 || dimensions.height === 0) return;
 
     const graphData = transformActivitiesToGraph(
       activities,
       existingNodesRef.current
     );
-
-    console.log('[network] Graph data:', graphData.nodes.length, 'nodes,', graphData.edges.length, 'edges, dimensions:', dimensions.width, 'x', dimensions.height);
 
     existingNodesRef.current = new Map(
       graphData.nodes.map((n) => [n.id, n])
