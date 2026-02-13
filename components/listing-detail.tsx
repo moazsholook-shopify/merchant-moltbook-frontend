@@ -52,126 +52,126 @@ function DiscussionThread({ comments }: { comments: ThreadComment[] }) {
     );
   }
 
-  // Build child map
-  const childMap = new Map<string, ThreadComment[]>();
+  // Collect all descendant IDs for a given root (flattened, regardless of nesting depth)
+  const topLevel = comments.filter(c => !c.parent_id);
+  const parentToRoot = new Map<string, string>(); // commentId → rootId
+  const rootReplies = new Map<string, ThreadComment[]>(); // rootId → all replies in order
+
+  // Map every comment to its root ancestor
+  const idToComment = new Map(comments.map(c => [c.id, c]));
+  function findRoot(c: ThreadComment): string {
+    if (!c.parent_id) return c.id;
+    const parent = idToComment.get(c.parent_id);
+    if (!parent || !parent.parent_id) return c.parent_id; // parent is root
+    // Walk up
+    let current = parent;
+    while (current.parent_id) {
+      const next = idToComment.get(current.parent_id);
+      if (!next) break;
+      current = next;
+    }
+    return current.id;
+  }
+
   comments.forEach(c => {
     if (c.parent_id) {
-      const arr = childMap.get(c.parent_id) || [];
+      const rootId = findRoot(c);
+      parentToRoot.set(c.id, rootId);
+      const arr = rootReplies.get(rootId) || [];
       arr.push(c);
-      childMap.set(c.parent_id, arr);
+      rootReplies.set(rootId, arr);
     }
   });
 
-  // Count all descendants recursively
-  const countDescendants = (id: string): number => {
-    const children = childMap.get(id) || [];
-    return children.reduce((sum, c) => sum + 1 + countDescendants(c.id), 0);
-  };
-
-  const toggleCollapse = (id: string) => {
+  const toggleCollapse = (rootId: string) => {
     setCollapsed(prev => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      if (next.has(rootId)) next.delete(rootId);
+      else next.add(rootId);
       return next;
     });
   };
 
-  const renderComment = (tc: ThreadComment, depth: number): React.ReactNode => {
-    const children = childMap.get(tc.id) || [];
-    const hasChildren = children.length > 0;
-    const isCollapsed = collapsed.has(tc.id);
-    const descendantCount = hasChildren ? countDescendants(tc.id) : 0;
-
-    return (
-      <div key={tc.id} className="relative">
-        <div className={`flex gap-2 ${depth > 0 ? "ml-5" : ""}`}>
-          {/* Collapsible thread line */}
-          {depth > 0 && (
-            <button
-              onClick={() => toggleCollapse(tc.id)}
-              className="absolute left-0 top-0 bottom-0 w-5 flex justify-center group cursor-pointer"
-              style={{ marginLeft: `${(depth - 1) * 20}px` }}
-              aria-label={isCollapsed ? "Expand thread" : "Collapse thread"}
-            >
-              <div className="w-0.5 h-full bg-border group-hover:bg-primary transition-colors" />
-            </button>
-          )}
-          <Avatar className={`${depth > 0 ? "h-6 w-6" : "h-8 w-8"} shrink-0 bg-secondary`}>
-            <AvatarFallback className="bg-secondary text-secondary-foreground text-xs font-medium">
-              {getInitials(tc.author_display_name || tc.author_name || "?")}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <div className="rounded-xl bg-secondary px-3 py-2">
-              <p className="text-sm font-semibold text-foreground">
-                {tc.author_id ? (
-                  <Link href={tc.agent_type === "MERCHANT" ? `/store/${tc.author_id}` : `/agent/${tc.author_id}`} className="hover:text-primary transition-colors" onClick={(e) => e.stopPropagation()}>
-                    {tc.author_display_name || tc.author_name}
-                  </Link>
-                ) : (
-                  tc.author_display_name || tc.author_name
-                )}
-                {tc.agent_type === "MERCHANT" && (
-                  <span className="ml-1.5 rounded bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">Store</span>
-                )}
-                <Bot className="ml-1 inline h-3 w-3 text-primary" />
-              </p>
-              <p className="mt-0.5 text-sm text-foreground">{tc.content}</p>
-            </div>
-            <div className="mt-1 flex items-center gap-2 px-3">
-              <span className="text-xs text-muted-foreground">
-                {new Date(tc.created_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
-              </span>
-              {hasChildren && depth === 0 && (
-                <button
-                  onClick={() => toggleCollapse(tc.id)}
-                  className="text-xs text-muted-foreground hover:text-primary transition-colors"
-                >
-                  {isCollapsed ? `+ ${descendantCount} ${descendantCount === 1 ? "reply" : "replies"}` : `- collapse`}
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Render children if not collapsed */}
-        {hasChildren && !isCollapsed && (
-          <div className="mt-2 space-y-2">
-            {children.map(child =>
-              renderComment(child, Math.min(depth + 1, 4))
+  const renderComment = (tc: ThreadComment, isReply: boolean) => (
+    <div key={tc.id} className={`flex gap-2 ${isReply ? "" : ""}`}>
+      <Avatar className={`${isReply ? "h-6 w-6" : "h-8 w-8"} shrink-0 bg-secondary`}>
+        <AvatarFallback className="bg-secondary text-secondary-foreground text-xs font-medium">
+          {getInitials(tc.author_display_name || tc.author_name || "?")}
+        </AvatarFallback>
+      </Avatar>
+      <div className="flex-1 min-w-0">
+        <div className="rounded-xl bg-secondary px-3 py-2">
+          <p className="text-sm font-semibold text-foreground">
+            {tc.author_id ? (
+              <Link href={tc.agent_type === "MERCHANT" ? `/store/${tc.author_id}` : `/agent/${tc.author_id}`} className="hover:text-primary transition-colors" onClick={(e) => e.stopPropagation()}>
+                {tc.author_display_name || tc.author_name}
+              </Link>
+            ) : (
+              tc.author_display_name || tc.author_name
             )}
-          </div>
-        )}
-
-        {/* Collapsed indicator for top-level threads */}
-        {hasChildren && isCollapsed && depth === 0 && (
-          <button
-            onClick={() => toggleCollapse(tc.id)}
-            className="ml-10 mt-1 flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
-          >
-            <div className="w-4 h-px bg-border" />
-            <span>{descendantCount} {descendantCount === 1 ? "reply" : "replies"} hidden</span>
-          </button>
-        )}
+            {tc.agent_type === "MERCHANT" && (
+              <span className="ml-1.5 rounded bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">Store</span>
+            )}
+            <Bot className="ml-1 inline h-3 w-3 text-primary" />
+          </p>
+          <p className="mt-0.5 text-sm text-foreground">{tc.content}</p>
+        </div>
+        <p className="mt-1 px-3 text-xs text-muted-foreground">
+          {new Date(tc.created_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+        </p>
       </div>
-    );
-  };
-
-  const topLevel = comments.filter(c => !c.parent_id);
+    </div>
+  );
 
   // If all flat, render in order
   if (topLevel.length === comments.length) {
     return (
       <div className="flex flex-col gap-3">
-        {comments.map(tc => renderComment(tc, 0))}
+        {comments.map(tc => renderComment(tc, false))}
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      {topLevel.map(tc => renderComment(tc, 0))}
+    <div className="flex flex-col gap-4">
+      {topLevel.map(root => {
+        const replies = rootReplies.get(root.id) || [];
+        const isCollapsed = collapsed.has(root.id);
+
+        return (
+          <div key={root.id}>
+            {/* Root comment */}
+            {renderComment(root, false)}
+
+            {/* Replies — single indented block with one clickable line */}
+            {replies.length > 0 && (
+              <div className="relative ml-4 mt-1">
+                {/* The single thread line — click to collapse/expand */}
+                <button
+                  onClick={() => toggleCollapse(root.id)}
+                  className="absolute left-0 top-0 bottom-0 w-4 flex justify-center group cursor-pointer z-10"
+                  aria-label={isCollapsed ? "Expand replies" : "Collapse replies"}
+                >
+                  <div className="w-0.5 h-full bg-border group-hover:bg-primary transition-colors rounded-full" />
+                </button>
+
+                {isCollapsed ? (
+                  <button
+                    onClick={() => toggleCollapse(root.id)}
+                    className="ml-5 py-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    {replies.length} {replies.length === 1 ? "reply" : "replies"} — click to expand
+                  </button>
+                ) : (
+                  <div className="ml-5 space-y-2 py-1">
+                    {replies.map(reply => renderComment(reply, true))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
