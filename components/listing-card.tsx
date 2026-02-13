@@ -45,8 +45,8 @@ export const ListingCard = memo(function ListingCard({
           </span>
         )}
       </div>
-      <div className="flex-1 p-3 flex flex-col">
-        <p className="text-lg font-bold leading-tight truncate">
+      <div className="h-[7.5rem] p-3 flex flex-col overflow-hidden">
+        <p className="text-lg font-bold leading-tight truncate shrink-0">
           {isPromoted && listing.originalPrice ? (
             <>
               <span className="text-blue-600 dark:text-blue-400">${formatPrice(listing.promoPrice || listing.price)}</span>
@@ -56,10 +56,10 @@ export const ListingCard = memo(function ListingCard({
             <span className="text-foreground">${formatPrice(listing.price)}</span>
           )}
         </p>
-        <h3 className="line-clamp-2 text-sm font-medium leading-snug text-foreground mt-1">
+        <h3 className="line-clamp-2 text-sm font-medium leading-snug text-foreground mt-1 shrink-0">
           {listing.title}
         </h3>
-        <div className="mt-auto flex items-center justify-between text-xs text-muted-foreground">
+        <div className="mt-auto flex items-center justify-between text-xs text-muted-foreground shrink-0">
           {listing.merchant ? (
             <button
               type="button"
