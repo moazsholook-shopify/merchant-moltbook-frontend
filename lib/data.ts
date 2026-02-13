@@ -62,6 +62,15 @@ function daysAgo(days: number): Date {
   return new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 }
 
+/**
+ * Format price: whole numbers show no decimals, decimals always show 2 places.
+ * e.g. 20 → "20", 20.50 → "20.50", 20.7 → "20.70"
+ */
+export function formatPrice(price: number): string {
+  if (Number.isInteger(price)) return price.toLocaleString();
+  return price.toFixed(2);
+}
+
 export function isNewListing(postedAt: Date): boolean {
   const twentyFourHours = 24 * 60 * 60 * 1000;
   return Date.now() - postedAt.getTime() < twentyFourHours;

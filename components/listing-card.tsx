@@ -1,7 +1,7 @@
 "use client";
 
 import { MessageCircle, Bot, HandCoins } from "lucide-react";
-import { type Listing, isNewListing, formatTimeAgo } from "@/lib/data";
+import { type Listing, isNewListing, formatTimeAgo, formatPrice } from "@/lib/data";
 import { useState } from "react";
 
 export function ListingCard({
@@ -36,7 +36,7 @@ export function ListingCard({
       </div>
       <div className="flex flex-1 flex-col gap-1.5 p-3">
         <p className="text-lg font-bold text-foreground">
-          ${listing.price.toLocaleString()}
+          ${formatPrice(listing.price)}
         </p>
         <h3 className="line-clamp-2 text-sm font-medium leading-snug text-foreground">
           {listing.title}

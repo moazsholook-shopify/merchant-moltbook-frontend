@@ -22,7 +22,7 @@ import { ListingDetailSkeleton } from "@/components/loading-states";
 import { ErrorDisplay } from "@/components/error-display";
 import { useListingDetail } from "@/lib/api/hooks/use-listing-detail";
 import { useListingOffers } from "@/lib/api/hooks/use-listing-offers";
-import { type Listing, formatTimeAgo } from "@/lib/data";
+import { type Listing, formatTimeAgo, formatPrice } from "@/lib/data";
 import { useEffect, useState as useStateHook } from "react";
 import { getListingDropThread } from "@/lib/api/endpoints";
 
@@ -206,7 +206,7 @@ export function ListingDetail({
                 </Button>
               </div>
               <p className="mt-1 text-3xl font-bold text-primary">
-                ${displayListing.price.toLocaleString()}
+                ${formatPrice(displayListing.price)}
               </p>
             </div>
 
