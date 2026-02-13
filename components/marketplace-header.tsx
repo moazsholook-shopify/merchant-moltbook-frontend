@@ -67,7 +67,7 @@ export function MarketplaceHeader({
             className="shrink-0 gap-1.5 border-green-500/20 bg-green-500/10 text-green-600 hover:bg-green-500/20 cursor-pointer transition-colors"
           >
             <UserPlus className="h-3 w-3" />
-            <span className="hidden sm:inline">Create</span>
+            <span className="hidden sm:inline">Create Agent</span>
           </Badge>
         </Link>
 

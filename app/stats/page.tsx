@@ -241,8 +241,8 @@ export default function StatsPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {stats.topMerchants.map((merchant, index) => (
-                          <tr key={merchant.id} className="border-b last:border-0 hover:bg-muted/30">
+                        {stats.topMerchants.map((merchant: Record<string, unknown>, index: number) => (
+                          <tr key={merchant.id as string} className="border-b last:border-0 hover:bg-muted/30">
                             <td className="p-4">
                               <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
                                 index === 0 ? "bg-yellow-500 text-yellow-950" :
@@ -254,25 +254,29 @@ export default function StatsPage() {
                               </span>
                             </td>
                             <td className="p-4">
-                              <div className="flex items-center gap-2">
+                              <Link href={`/store/${merchant.storeId || merchant.id}`} className="flex items-center gap-2 hover:text-primary transition-colors">
                                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                                   <Bot className="h-4 w-4 text-primary" />
                                 </div>
                                 <div>
-                                  <p className="font-medium">{merchant.displayName}</p>
-                                  <p className="text-xs text-muted-foreground">@{merchant.username}</p>
+                                  <p className="font-medium">{merchant.displayName as string}</p>
+                                  <p className="text-xs text-muted-foreground">@{merchant.username as string}</p>
                                 </div>
-                              </div>
+                              </Link>
                             </td>
-                            <td className="p-4 text-sm">{merchant.storeName}</td>
+                            <td className="p-4 text-sm">
+                              <Link href={`/store/${merchant.storeId || merchant.id}`} className="hover:text-primary transition-colors">
+                                {merchant.storeName as string}
+                              </Link>
+                            </td>
                             <td className="p-4 text-center">
                               <Badge variant={merchant.rating !== "N/A" ? "default" : "secondary"}>
                                 {merchant.rating !== "N/A" ? `${merchant.rating}` : "N/A"}
                               </Badge>
                             </td>
-                            <td className="p-4 text-center">{merchant.products}</td>
-                            <td className="p-4 text-center">{merchant.transactions}</td>
-                            <td className="p-4 text-center">{merchant.reviews}</td>
+                            <td className="p-4 text-center">{merchant.products as number}</td>
+                            <td className="p-4 text-center">{merchant.transactions as number}</td>
+                            <td className="p-4 text-center">{merchant.reviews as number}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -300,8 +304,8 @@ export default function StatsPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {stats.topCustomers.map((customer, index) => (
-                          <tr key={customer.id} className="border-b last:border-0 hover:bg-muted/30">
+                        {stats.topCustomers.map((customer: Record<string, unknown>, index: number) => (
+                          <tr key={customer.id as string} className="border-b last:border-0 hover:bg-muted/30">
                             <td className="p-4">
                               <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
                                 index === 0 ? "bg-yellow-500 text-yellow-950" :
@@ -313,20 +317,20 @@ export default function StatsPage() {
                               </span>
                             </td>
                             <td className="p-4">
-                              <div className="flex items-center gap-2">
+                              <Link href={`/agent/${customer.id}`} className="flex items-center gap-2 hover:text-primary transition-colors">
                                 <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
                                   <Users className="h-4 w-4 text-secondary-foreground" />
                                 </div>
                                 <div>
-                                  <p className="font-medium">{customer.displayName}</p>
-                                  <p className="text-xs text-muted-foreground">@{customer.username}</p>
+                                  <p className="font-medium">{customer.displayName as string}</p>
+                                  <p className="text-xs text-muted-foreground">@{customer.username as string}</p>
                                 </div>
-                              </div>
+                              </Link>
                             </td>
-                            <td className="p-4 text-center">{customer.offersMade}</td>
-                            <td className="p-4 text-center">{customer.ordersPlaced}</td>
-                            <td className="p-4 text-center">{customer.reviewsGiven}</td>
-                            <td className="p-4 text-center">{customer.commentsMade}</td>
+                            <td className="p-4 text-center">{customer.offersMade as number}</td>
+                            <td className="p-4 text-center">{customer.ordersPlaced as number}</td>
+                            <td className="p-4 text-center">{customer.reviewsGiven as number}</td>
+                            <td className="p-4 text-center">{customer.commentsMade as number}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -340,35 +344,37 @@ export default function StatsPage() {
             <section>
               <h2 className="text-xl font-semibold mb-4">Hot Listings</h2>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-                {stats.hotListings.map((listing, index) => (
-                  <Card key={listing.listingId} className="overflow-hidden">
-                    <div className="relative aspect-square bg-muted">
-                      {listing.imageUrl ? (
-                        <img
-                          src={transformImageUrl(listing.imageUrl)}
-                          alt={listing.productTitle}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center h-full">
-                          <Package className="h-12 w-12 text-muted-foreground" />
-                        </div>
-                      )}
-                      <Badge className="absolute top-2 left-2" variant="secondary">
-                        #{index + 1}
-                      </Badge>
-                    </div>
-                    <CardContent className="p-4">
-                      <h3 className="font-medium truncate">{listing.productTitle}</h3>
-                      <p className="text-sm text-muted-foreground truncate">{listing.storeName}</p>
-                      <p className="text-lg font-bold mt-2">{listing.price.formatted}</p>
-                      <div className="flex gap-2 mt-2 text-xs text-muted-foreground">
-                        <span>{listing.offers} offers</span>
-                        <span>|</span>
-                        <span>{listing.orders} orders</span>
+                {stats.hotListings.map((listing: Record<string, unknown>, index: number) => (
+                  <Link key={listing.listingId as string} href={`/listing/${listing.listingId}`}>
+                    <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
+                      <div className="relative aspect-square bg-muted">
+                        {listing.imageUrl ? (
+                          <img
+                            src={transformImageUrl(listing.imageUrl as string)}
+                            alt={listing.productTitle as string}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center h-full">
+                            <Package className="h-12 w-12 text-muted-foreground" />
+                          </div>
+                        )}
+                        <Badge className="absolute top-2 left-2" variant="secondary">
+                          #{index + 1}
+                        </Badge>
                       </div>
-                    </CardContent>
-                  </Card>
+                      <CardContent className="p-4">
+                        <h3 className="font-medium truncate">{listing.productTitle as string}</h3>
+                        <p className="text-sm text-muted-foreground truncate">{listing.storeName as string}</p>
+                        <p className="text-lg font-bold mt-2">{(listing.price as { formatted: string }).formatted}</p>
+                        <div className="flex gap-2 mt-2 text-xs text-muted-foreground">
+                          <span>{listing.offers as number} offers</span>
+                          <span>|</span>
+                          <span>{listing.orders as number} orders</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
                 ))}
               </div>
             </section>
