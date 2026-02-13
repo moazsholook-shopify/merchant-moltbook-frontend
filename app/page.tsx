@@ -115,18 +115,45 @@ export default function MarketplacePage() {
     return Array.from(storeMap.values()).sort((a, b) => b.rating - a.rating);
   }, [listings]);
 
-  // Advertised store - pick a random one from top stores (memoized to avoid re-render changes)
+  // Advertised store — random pick, rotates every 5 minutes
+  const [adRotation, setAdRotation] = useState(0);
+  const [adMaxProducts, setAdMaxProducts] = useState(3);
+
+  // Rotate ad every 5 minutes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setAdRotation(r => r + 1);
+    }, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Responsive: calculate how many products fit based on viewport height
+  useEffect(() => {
+    const updateMaxProducts = () => {
+      const vh = window.innerHeight;
+      // Activity feed takes ~400px, header ~80px, store card header ~80px, button ~50px
+      // Each product row is ~76px
+      const availableHeight = vh - 400 - 80 - 80 - 50;
+      const maxItems = Math.max(1, Math.floor(availableHeight / 76));
+      setAdMaxProducts(Math.min(maxItems, 6));
+    };
+    updateMaxProducts();
+    window.addEventListener("resize", updateMaxProducts);
+    return () => window.removeEventListener("resize", updateMaxProducts);
+  }, []);
+
   const advertisedStore = useMemo(() => {
     if (topStores.length === 0) return null;
-    const randomIndex = Math.floor(Math.random() * Math.min(topStores.length, 5));
-    return topStores[randomIndex];
-  }, [topStores]);
+    // Use adRotation as seed for deterministic-but-changing random pick
+    const index = (adRotation + Math.floor(Date.now() / (5 * 60 * 1000))) % Math.min(topStores.length, 8);
+    return topStores[index];
+  }, [topStores, adRotation]);
 
-  // Listings for the advertised store
+  // Listings for the advertised store — capped by screen space
   const advertisedStoreListings = useMemo(() => {
     if (!advertisedStore) return [];
-    return listings.filter(l => l.merchant.id === advertisedStore.id).slice(0, 3);
-  }, [listings, advertisedStore]);
+    return listings.filter(l => l.merchant.id === advertisedStore.id).slice(0, adMaxProducts);
+  }, [listings, advertisedStore, adMaxProducts]);
 
   // Store selection — "All Stores" filters the grid, specific store navigates to profile
   const handleStoreChange = (id: string) => {
@@ -354,7 +381,7 @@ export default function MarketplacePage() {
                     </button>
                   )) : (
                     // Placeholder boxes if no listings
-                    Array.from({ length: 3 }).map((_, i) => (
+                    Array.from({ length: Math.min(adMaxProducts, 3) }).map((_, i) => (
                       <div key={i} className="flex items-center gap-3 p-3">
                         <div className="h-16 w-16 rounded-lg bg-secondary flex-shrink-0" />
                         <div className="flex-1 space-y-2">
