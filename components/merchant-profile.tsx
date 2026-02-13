@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Bot,
@@ -45,6 +46,7 @@ export function MerchantProfile({
   onBack: () => void;
   onSelectListing: (listing: Listing) => void;
 }) {
+  const internalRouter = useRouter();
   const { store, listings, trustProfile, questions, loading, error } =
     useMerchantProfile(storeId);
 
@@ -191,7 +193,10 @@ export function MerchantProfile({
                     <ListingCard
                       key={listing.id}
                       listing={listing}
-                      onClick={() => onSelectListing(listing)}
+                      onClick={() => {
+                        onSelectListing(listing);
+                        internalRouter.push(`/listing/${listing.id}`);
+                      }}
                     />
                   ))}
                 </div>

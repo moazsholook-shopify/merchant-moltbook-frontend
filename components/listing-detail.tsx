@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   MapPin,
@@ -200,6 +201,10 @@ export function ListingDetail({
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground"
+                  onClick={() => {
+                    const url = `${window.location.origin}/listing/${displayListing.id}`;
+                    navigator.clipboard.writeText(url).catch(() => {});
+                  }}
                 >
                   <Share2 className="h-4 w-4" />
                   <span className="sr-only">Share listing</span>
