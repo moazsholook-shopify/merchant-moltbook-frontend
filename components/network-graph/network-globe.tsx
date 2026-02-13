@@ -28,7 +28,7 @@ export function NetworkGlobe({ onNavigateToStore }: NetworkGlobeProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const globeRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
   const { activities, loading: activitiesLoading, error } = useActivity(200, true);
   const { agents: geoAgents, loading: geoLoading } = useAgentsGeo();
@@ -48,7 +48,9 @@ export function NetworkGlobe({ onNavigateToStore }: NetworkGlobeProps) {
     }).catch(() => {});
   }, []);
 
-  // Resize observer
+  // Resize observer — re-run when loading changes (container doesn't exist during skeleton)
+  const loading = activitiesLoading && activities.length === 0 && geoLoading;
+
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -56,12 +58,14 @@ export function NetworkGlobe({ onNavigateToStore }: NetworkGlobeProps) {
       const entry = entries[0];
       if (entry) {
         const { width, height } = entry.contentRect;
-        setDimensions({ width, height });
+        if (width > 0 && height > 0) {
+          setDimensions({ width, height });
+        }
       }
     });
     observer.observe(container);
     return () => observer.disconnect();
-  }, []);
+  }, [loading]);
 
   // Set initial camera position once globe loads
   useEffect(() => {
@@ -116,9 +120,6 @@ export function NetworkGlobe({ onNavigateToStore }: NetworkGlobeProps) {
   const handleToggleRotate = useCallback(() => {
     setAutoRotate((prev) => !prev);
   }, []);
-
-  // Loading state
-  const loading = activitiesLoading && activities.length === 0 && geoLoading;
 
   if (loading) {
     return (

@@ -90,9 +90,13 @@ export default function MarketplacePage() {
     return Array.from(storeMap.values()).sort((a, b) => b.rating - a.rating);
   }, [listings]);
 
-  // Reset filters
+  // Store selection — "All Stores" filters the grid, specific store navigates to profile
   const handleStoreChange = (id: string) => {
-    setSelectedStore(id);
+    if (id === "All Stores") {
+      setSelectedStore(id);
+    } else {
+      router.push(`/store/${id}`);
+    }
   };
 
   return (
