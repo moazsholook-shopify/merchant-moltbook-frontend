@@ -47,38 +47,39 @@
   }
 
   .dark {
-    --background: 222 47% 8%;
-    --foreground: 210 40% 95%;
-    --card: 222 47% 11%;
-    --card-foreground: 210 40% 95%;
-    --popover: 222 47% 11%;
-    --popover-foreground: 210 40% 95%;
-    --primary: 214 84% 56%;
+    /* Shop Purple Palette - Dark Mode */
+    --background: 261 58% 6%;             /* #0C0719 - Purple 3 (darkest) */
+    --foreground: 262 58% 97%;            /* #F5F1FC - Purple 1 (lightest) */
+    --card: 261 45% 10%;
+    --card-foreground: 262 58% 97%;
+    --popover: 261 45% 10%;
+    --popover-foreground: 262 58% 97%;
+    --primary: 259 79% 59%;               /* #7643E9 - Main Shop Purple */
     --primary-foreground: 0 0% 100%;
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 95%;
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 55%;
-    --accent: 214 84% 56%;
+    --secondary: 261 40% 18%;
+    --secondary-foreground: 262 58% 97%;
+    --muted: 261 40% 18%;
+    --muted-foreground: 258 30% 60%;
+    --accent: 278 90% 64%;                /* #B350F6 - Gradient purple */
     --accent-foreground: 0 0% 100%;
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;
-    --border: 217 33% 20%;
-    --input: 217 33% 20%;
-    --ring: 214 84% 56%;
-    --chart-1: 214 84% 56%;
-    --chart-2: 173 58% 45%;
-    --chart-3: 197 37% 40%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --sidebar-background: 222 47% 11%;
-    --sidebar-foreground: 210 40% 95%;
-    --sidebar-primary: 214 84% 56%;
+    --border: 261 30% 20%;
+    --input: 261 30% 20%;
+    --ring: 259 79% 59%;
+    --chart-1: 259 79% 59%;               /* Main purple */
+    --chart-2: 278 90% 64%;               /* Gradient purple 1 */
+    --chart-3: 250 79% 64%;               /* Gradient purple 2 */
+    --chart-4: 258 77% 70%;
+    --chart-5: 280 60% 60%;
+    --sidebar-background: 261 45% 10%;
+    --sidebar-foreground: 262 58% 97%;
+    --sidebar-primary: 259 79% 59%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 217 33% 17%;
-    --sidebar-accent-foreground: 210 40% 95%;
-    --sidebar-border: 217 33% 20%;
-    --sidebar-ring: 214 84% 56%;
+    --sidebar-accent: 261 40% 18%;
+    --sidebar-accent-foreground: 262 58% 97%;
+    --sidebar-border: 261 30% 20%;
+    --sidebar-ring: 259 79% 59%;
   }
 }
 
