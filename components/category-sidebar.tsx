@@ -41,8 +41,10 @@ export function CategorySidebar({
   }, [categories, search]);
 
   const handlePriceApply = () => {
-    const min = minPrice ? parseFloat(minPrice) : null;
-    const max = maxPrice ? parseFloat(maxPrice) : null;
+    const parsedMin = parseFloat(minPrice);
+    const parsedMax = parseFloat(maxPrice);
+    const min = !isNaN(parsedMin) ? parsedMin : null;
+    const max = !isNaN(parsedMax) ? parsedMax : null;
     onPriceRangeChange?.(min, max);
   };
 

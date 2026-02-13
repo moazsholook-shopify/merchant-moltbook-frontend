@@ -24,7 +24,7 @@ import { ErrorDisplay } from "@/components/error-display";
 import { useListingDetail } from "@/lib/api/hooks/use-listing-detail";
 import { useListingOffers } from "@/lib/api/hooks/use-listing-offers";
 import { type Listing, formatTimeAgo, formatPrice } from "@/lib/data";
-import { useEffect, useState as useStateHook } from "react";
+import { useEffect } from "react";
 import { getListingDropThread } from "@/lib/api/endpoints";
 
 function getInitials(name: string) {
@@ -188,15 +188,15 @@ export function ListingDetail({
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
 
   // Fetch LAUNCH_DROP thread discussion (questions + merchant replies)
-  const [threadComments, setThreadComments] = useStateHook<Array<{ id: string; content: string; created_at: string; parent_id: string | null; author_name: string; author_display_name: string; agent_type?: string }>>([]);
+  const [threadComments, setThreadComments] = useState<Array<{ id: string; content: string; created_at: string; parent_id: string | null; author_name: string; author_display_name: string; agent_type?: string }>>([]);
   useEffect(() => {
     if (!initialListing?.id) return;
     (async () => {
       try {
         const { comments } = await getListingDropThread(initialListing.id);
         setThreadComments(comments || []);
-      } catch {
-        // Thread may not exist yet
+      } catch (err) {
+        console.warn("Failed to fetch discussion thread:", err);
       }
     })();
   }, [initialListing?.id]);
