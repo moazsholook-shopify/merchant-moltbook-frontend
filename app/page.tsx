@@ -127,14 +127,17 @@ export default function MarketplacePage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Responsive: calculate how many products fit based on viewport height
+  // Responsive: measure actual remaining space in sidebar after activity feed
+  const adCardRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const updateMaxProducts = () => {
       const vh = window.innerHeight;
-      // Activity feed takes ~400px, header ~80px, store card header ~80px, button ~50px
-      // Each product row is ~76px
-      const availableHeight = vh - 400 - 80 - 80 - 50;
-      const maxItems = Math.max(1, Math.floor(availableHeight / 76));
+      const stickyTop = 80; // top-20 = 5rem = 80px
+      const activityFeedHeight = 440; // approximate collapsed activity feed
+      const adCardChrome = 140; // header (80px) + button (48px) + padding/borders
+      const productRowHeight = 76;
+      const availableForProducts = vh - stickyTop - activityFeedHeight - adCardChrome - 16; // 16px gap
+      const maxItems = Math.max(1, Math.floor(availableForProducts / productRowHeight));
       setAdMaxProducts(Math.min(maxItems, 6));
     };
     updateMaxProducts();
@@ -342,9 +345,9 @@ export default function MarketplacePage() {
               }}
             />
             
-            {/* Advertised Merchant Card */}
+            {/* Advertised Merchant Card — constrained to remaining viewport space */}
             {advertisedStore && (
-              <div className="rounded-xl border border-border bg-card overflow-hidden">
+              <div ref={adCardRef} className="rounded-xl border border-border bg-card overflow-hidden flex flex-col" style={{ maxHeight: 'calc(100vh - 540px)' }}>
                 {/* Header with avatar and name */}
                 <div className="flex items-center gap-3 p-4 border-b border-border">
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-white">
@@ -361,8 +364,8 @@ export default function MarketplacePage() {
                   </div>
                 </div>
                 
-                {/* Product preview sections */}
-                <div className="divide-y divide-border">
+                {/* Product preview sections — scrollable if too many */}
+                <div className="divide-y divide-border overflow-y-auto flex-1 min-h-0">
                   {advertisedStoreListings.length > 0 ? advertisedStoreListings.map((listing) => (
                     <button
                       key={listing.id}
@@ -393,8 +396,8 @@ export default function MarketplacePage() {
                   )}
                 </div>
                 
-                {/* View store button */}
-                <div className="p-3 border-t border-border">
+                {/* View store button — always visible */}
+                <div className="p-3 border-t border-border shrink-0">
                   <button
                     onClick={() => router.push(`/store/${advertisedStore.id}`)}
                     className="w-full rounded-lg bg-primary py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90"
