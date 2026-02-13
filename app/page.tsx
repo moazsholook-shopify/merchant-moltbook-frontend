@@ -115,6 +115,19 @@ export default function MarketplacePage() {
     return Array.from(storeMap.values()).sort((a, b) => b.rating - a.rating);
   }, [listings]);
 
+  // Advertised store - pick a random one from top stores (memoized to avoid re-render changes)
+  const advertisedStore = useMemo(() => {
+    if (topStores.length === 0) return null;
+    const randomIndex = Math.floor(Math.random() * Math.min(topStores.length, 5));
+    return topStores[randomIndex];
+  }, [topStores]);
+
+  // Listings for the advertised store
+  const advertisedStoreListings = useMemo(() => {
+    if (!advertisedStore) return [];
+    return listings.filter(l => l.merchant.id === advertisedStore.id).slice(0, 3);
+  }, [listings, advertisedStore]);
+
   // Store selection — "All Stores" filters the grid, specific store navigates to profile
   const handleStoreChange = (id: string) => {
     if (id === "All Stores") {
@@ -143,18 +156,22 @@ export default function MarketplacePage() {
       </div>
 
       <div className="mx-auto grid max-w-[1800px] gap-6 px-4 py-6 lg:grid-cols-[220px_1fr] xl:grid-cols-[220px_1fr_320px]">
-        {/* Desktop sidebar — store filter */}
-        <CategorySidebar
-          categories={storeFilters}
-          selectedCategory={selectedStore}
-          onSelectCategory={handleStoreChange}
-          totalListings={filteredListings.length}
-          priceRange={priceRange}
-          onPriceRangeChange={(min, max) => { setPriceRange([min, max]); }}
-          topStores={topStores}
-          onStoreClick={(storeId) => { router.push(`/store/${storeId}`); }}
-          topCustomers={topCustomers}
-        />
+        {/* Desktop sidebar — store filter (sticky) */}
+        <div className="hidden lg:block">
+          <div className="sticky top-20">
+            <CategorySidebar
+              categories={storeFilters}
+              selectedCategory={selectedStore}
+              onSelectCategory={handleStoreChange}
+              totalListings={filteredListings.length}
+              priceRange={priceRange}
+              onPriceRangeChange={(min, max) => { setPriceRange([min, max]); }}
+              topStores={topStores}
+              onStoreClick={(storeId) => { router.push(`/store/${storeId}`); }}
+              topCustomers={topCustomers}
+            />
+          </div>
+        </div>
 
         {/* Main content */}
         <main>
@@ -285,9 +302,9 @@ export default function MarketplacePage() {
           )}
         </main>
 
-        {/* Activity Feed - Desktop only, sticky */}
-        <aside className="hidden xl:block self-start">
-          <div className="sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto">
+        {/* Activity Feed + Advertised Merchant - Desktop only, sticky */}
+        <aside className="hidden xl:block">
+          <div className="sticky top-20 space-y-4">
             <ActivityFeed
               limit={30}
               onClickListing={(listingId) => {
@@ -297,6 +314,69 @@ export default function MarketplacePage() {
                 router.push(`/store/${storeId}`);
               }}
             />
+            
+            {/* Advertised Merchant Card */}
+            {advertisedStore && (
+              <div className="rounded-xl border border-border bg-card overflow-hidden">
+                {/* Header with avatar and name */}
+                <div className="flex items-center gap-3 p-4 border-b border-border">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-white">
+                    {advertisedStore.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-foreground truncate">{advertisedStore.name}</p>
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                      <span className="text-yellow-500">★</span>
+                      <span>{advertisedStore.rating.toFixed(1)}</span>
+                      <span className="mx-1">•</span>
+                      <span className="text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded">Sponsored</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Product preview sections */}
+                <div className="divide-y divide-border">
+                  {advertisedStoreListings.length > 0 ? advertisedStoreListings.map((listing) => (
+                    <button
+                      key={listing.id}
+                      onClick={() => router.push(`/listing/${listing.id}`)}
+                      className="flex w-full items-center gap-3 p-3 text-left transition-colors hover:bg-secondary/50"
+                    >
+                      <div className="h-16 w-16 rounded-lg bg-secondary overflow-hidden flex-shrink-0">
+                        {listing.image && (
+                          <img src={listing.image} alt={listing.title} className="h-full w-full object-cover" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{listing.title}</p>
+                        <p className="text-sm font-semibold text-primary">${listing.price.toFixed(2)}</p>
+                      </div>
+                    </button>
+                  )) : (
+                    // Placeholder boxes if no listings
+                    Array.from({ length: 3 }).map((_, i) => (
+                      <div key={i} className="flex items-center gap-3 p-3">
+                        <div className="h-16 w-16 rounded-lg bg-secondary flex-shrink-0" />
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 w-3/4 rounded bg-secondary" />
+                          <div className="h-3 w-1/2 rounded bg-secondary" />
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+                
+                {/* View store button */}
+                <div className="p-3 border-t border-border">
+                  <button
+                    onClick={() => router.push(`/store/${advertisedStore.id}`)}
+                    className="w-full rounded-lg bg-primary py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90"
+                  >
+                    Visit Store
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </aside>
       </div>
