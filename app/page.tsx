@@ -21,12 +21,10 @@ export default function MarketplacePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [selectedMerchantId, setSelectedMerchantId] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
   const [priceRange, setPriceRange] = useState<[number | null, number | null]>([null, null]);
-  const ITEMS_PER_PAGE = 30;
 
-  // Fetch listings from API
-  const { listings, loading, error, refetch } = useListings();
+  // Fetch listings from API (server-side pagination)
+  const { listings, loading, error, refetch, page, hasMore, loadPage } = useListings();
 
   // Build store list from listings (unique stores)
   const storeFilters: StoreFilter[] = useMemo(() => {
@@ -71,17 +69,9 @@ export default function MarketplacePage() {
     return Array.from(storeMap.values()).sort((a, b) => b.rating - a.rating);
   }, [listings]);
 
-  // Pagination
-  const totalPages = Math.ceil(filteredListings.length / ITEMS_PER_PAGE);
-  const paginatedListings = useMemo(() => {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredListings.slice(start, start + ITEMS_PER_PAGE);
-  }, [filteredListings, currentPage]);
-
-  // Reset page when filter changes
+  // Reset filters
   const handleStoreChange = (id: string) => {
     setSelectedStore(id);
-    setCurrentPage(1);
     setSelectedListing(null);
   };
 
@@ -174,7 +164,7 @@ export default function MarketplacePage() {
               ) : (
                 <>
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-                    {paginatedListings.map((listing) => (
+                    {filteredListings.map((listing) => (
                       <ListingCard
                         key={listing.id}
                         listing={listing}
@@ -184,52 +174,26 @@ export default function MarketplacePage() {
                     ))}
                   </div>
 
-                  {/* Pagination */}
-                  {totalPages > 1 && (
-                    <div className="mt-6 flex items-center justify-center gap-2">
-                      <button
-                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                        disabled={currentPage === 1}
-                        className="rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:bg-secondary text-foreground"
-                      >
-                        Previous
-                      </button>
-
-                      {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
-                        let page: number;
-                        if (totalPages <= 7) {
-                          page = i + 1;
-                        } else if (currentPage <= 4) {
-                          page = i + 1;
-                        } else if (currentPage >= totalPages - 3) {
-                          page = totalPages - 6 + i;
-                        } else {
-                          page = currentPage - 3 + i;
-                        }
-                        return (
-                          <button
-                            key={page}
-                            onClick={() => setCurrentPage(page)}
-                            className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                              currentPage === page
-                                ? "bg-primary text-primary-foreground"
-                                : "hover:bg-secondary text-foreground"
-                            }`}
-                          >
-                            {page}
-                          </button>
-                        );
-                      })}
-
-                      <button
-                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                        disabled={currentPage === totalPages}
-                        className="rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:bg-secondary text-foreground"
-                      >
-                        Next
-                      </button>
-                    </div>
-                  )}
+                  {/* Server-side Pagination */}
+                  <div className="mt-6 flex items-center justify-center gap-3">
+                    <button
+                      onClick={() => loadPage(page - 1)}
+                      disabled={page <= 1 || loading}
+                      className="rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:bg-secondary text-foreground"
+                    >
+                      Previous
+                    </button>
+                    <span className="text-sm text-muted-foreground">
+                      Page {page}
+                    </span>
+                    <button
+                      onClick={() => loadPage(page + 1)}
+                      disabled={!hasMore || loading}
+                      className="rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:bg-secondary text-foreground"
+                    >
+                      Next
+                    </button>
+                  </div>
                 </>
               )}
             </>
