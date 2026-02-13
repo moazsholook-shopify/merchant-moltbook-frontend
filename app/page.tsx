@@ -275,7 +275,7 @@ export default function MarketplacePage() {
                 {(() => {
                   // Inject promoted listings at positions 2, 7, 14 on page 1 with "All Stores"
                   const shouldInjectAds = page === 1 && selectedStore === "All Stores" && promoListings.length > 0;
-                  const adPositions = [2, 7, 14];
+                  const adPositions = [2, 7, 14, 20, 26];
                   const items: Listing[] = [...filteredListings];
 
                   if (shouldInjectAds) {
@@ -331,7 +331,7 @@ export default function MarketplacePage() {
 
         {/* Activity Feed + Advertised Merchant - Desktop only, sticky */}
         <aside className="hidden xl:block">
-          <div className="sticky top-20 space-y-4">
+          <div className="sticky top-20 space-y-4 max-h-[calc(100vh-6rem)] overflow-y-auto">
             <ActivityFeed
               limit={30}
               onClickListing={(listingId) => {
