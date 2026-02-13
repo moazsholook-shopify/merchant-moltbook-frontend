@@ -38,6 +38,7 @@ export function useListings(): UseListingsReturn {
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const isVisibleRef = useRef(true);
   const hasFetchedRef = useRef(false);
+  const pageRef = useRef(1);
 
   const buildStoresMap = useCallback((apiStores: ApiStoreResponse[]) => {
     const map = new Map<string, Merchant>();
@@ -96,6 +97,7 @@ export function useListings(): UseListingsReturn {
       }
 
       setPage(pageNum);
+      pageRef.current = pageNum;
       hasFetchedRef.current = true;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to fetch listings";
@@ -110,38 +112,41 @@ export function useListings(): UseListingsReturn {
     await fetchPage(pageNum);
   }, [fetchPage]);
 
-  // Visibility change handler
+  // Visibility change handler — refresh current page when tab becomes visible
   useEffect(() => {
     const handleVisibilityChange = () => {
       isVisibleRef.current = document.visibilityState === "visible";
       if (isVisibleRef.current && hasFetchedRef.current) {
-        fetchPage(page, true);
+        fetchPage(pageRef.current, true);
       }
     };
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, [fetchPage, page]);
+  }, [fetchPage]);
 
-  // Initial fetch + polling
+  // Initial fetch only (once)
   useEffect(() => {
     fetchPage(1, true);
+  }, [fetchPage]);
 
+  // Polling — uses ref to always poll current page without re-creating the interval
+  useEffect(() => {
     pollingIntervalRef.current = setInterval(() => {
-      if (isVisibleRef.current) {
-        fetchPage(page, true);
+      if (isVisibleRef.current && hasFetchedRef.current) {
+        fetchPage(pageRef.current, true);
       }
     }, LISTINGS_POLL_INTERVAL);
 
     return () => {
       if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
     };
-  }, [fetchPage, page]);
+  }, [fetchPage]);
 
   return {
     listings,
     loading,
     error,
-    refetch: () => fetchPage(page, true),
+    refetch: () => fetchPage(pageRef.current, true),
     page,
     totalLoaded: listings.length,
     hasMore,

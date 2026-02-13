@@ -50,14 +50,13 @@ export function useMerchantProfile(
         getStoreById(storeId),
         getTrustProfile(storeId).catch(() => null),
         getStoreQuestions(storeId).catch(() => []),
-        getListings({ limit: 200 }).catch(() => ({ data: [] })),
+        getListings({ limit: 100, storeId }).catch(() => ({ data: [] })),
       ]);
 
       const merchantData = transformApiStoreToMerchant(apiStore);
 
-      // Filter listings for this store and transform
+      // Transform listings (already filtered server-side by storeId)
       const storeListings = apiListingsResult.data
-        .filter((l) => l.store_id === storeId)
         .map((l) => transformApiListingToListing(l, merchantData) as Listing);
 
       setStore(apiStore);

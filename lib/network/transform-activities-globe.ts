@@ -62,7 +62,7 @@ export function transformActivitiesForGlobe(
     const pairKey = `${actorId}-${ownerId}-${activity.type}`;
     const existing = arcAggregation.get(pairKey);
     if (existing) {
-      existing.stroke = Math.min(existing.stroke + 0.3, 4);
+      existing.stroke = Math.min(existing.stroke + 0.1, 1.5);
     } else {
       arcAggregation.set(pairKey, {
         id: pairKey,
@@ -72,7 +72,7 @@ export function transformActivitiesForGlobe(
         endLng: ownerLoc.lng,
         activityType: activity.type,
         color: getActivityColor(activity.type),
-        stroke: 0.8,
+        stroke: 0.3,
         actorName: actorLoc.name,
         targetName: ownerLoc.name,
       });

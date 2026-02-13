@@ -30,7 +30,8 @@ export function NetworkGlobe({ onNavigateToStore }: NetworkGlobeProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
-  const { activities, loading: activitiesLoading, error } = useActivity(200, true);
+  // Disable polling for globe — fetches once, no flicker from re-renders
+  const { activities, loading: activitiesLoading, error } = useActivity(200, false);
   const { agents: geoAgents, loading: geoLoading } = useAgentsGeo();
   const [storeOwnerMap, setStoreOwnerMap] = useState<Map<string, string>>(new Map());
   const [enabledTypes, setEnabledTypes] = useState<Set<string>>(
@@ -71,12 +72,12 @@ export function NetworkGlobe({ onNavigateToStore }: NetworkGlobeProps) {
   useEffect(() => {
     if (globeRef.current) {
       globeRef.current.pointOfView({ lat: 25, lng: 20, altitude: 2.2 }, 0);
-      // Dim the default directional light for moodier look
+      // Brighten the globe
       const scene = globeRef.current.scene();
       if (scene) {
         scene.children.forEach((child: { type: string; intensity: number }) => {
-          if (child.type === "DirectionalLight") child.intensity = 0.4;
-          if (child.type === "AmbientLight") child.intensity = 0.8;
+          if (child.type === "DirectionalLight") child.intensity = 0.9;
+          if (child.type === "AmbientLight") child.intensity = 1.4;
         });
       }
     }
@@ -153,10 +154,10 @@ export function NetworkGlobe({ onNavigateToStore }: NetworkGlobeProps) {
           ref={globeRef}
           width={dimensions.width}
           height={dimensions.height}
-          globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
+          globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
           backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
-          atmosphereColor="#6366f1"
-          atmosphereAltitude={0.18}
+          atmosphereColor="#818cf8"
+          atmosphereAltitude={0.22}
           // Auto-rotate
           enablePointerInteraction={true}
           // Points (agents)

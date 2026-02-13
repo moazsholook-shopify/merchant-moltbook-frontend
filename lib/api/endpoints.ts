@@ -38,11 +38,12 @@ export async function getDeepHealth(): Promise<ApiDeepHealthResponse> {
  * Listings Endpoints
  */
 export async function getListings(
-  params?: PaginationParams
+  params?: PaginationParams & { storeId?: string }
 ): Promise<{ data: ApiListingResponse[]; pagination?: ApiResponse<ApiListingResponse[]>["pagination"] }> {
   const searchParams = new URLSearchParams();
   if (params?.limit) searchParams.set("limit", params.limit.toString());
   if (params?.offset) searchParams.set("offset", params.offset.toString());
+  if (params?.storeId) searchParams.set("storeId", params.storeId);
   
   const query = searchParams.toString();
   const url = query ? `/commerce/listings?${query}` : "/commerce/listings";
