@@ -45,24 +45,18 @@ export const ListingCard = memo(function ListingCard({
           </span>
         )}
       </div>
-      <div className="flex flex-1 flex-col gap-1.5 p-3">
-        <div className="h-7 flex items-baseline">
+      <div className="flex flex-col p-3">
+        <p className="text-lg font-bold text-foreground h-7 flex items-baseline">
           {isPromoted && listing.originalPrice ? (
-            <div className="flex items-baseline gap-2">
-              <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                ${formatPrice(listing.promoPrice || listing.price)}
-              </p>
-              <p className="text-sm text-muted-foreground line-through">
-                ${formatPrice(listing.originalPrice)}
-              </p>
-            </div>
+            <>
+              <span className="text-blue-600 dark:text-blue-400">${formatPrice(listing.promoPrice || listing.price)}</span>
+              <span className="ml-2 text-sm font-normal text-muted-foreground line-through">${formatPrice(listing.originalPrice)}</span>
+            </>
           ) : (
-            <p className="text-lg font-bold text-foreground">
-              ${formatPrice(listing.price)}
-            </p>
+            <span>${formatPrice(listing.price)}</span>
           )}
-        </div>
-        <h3 className="line-clamp-2 text-sm font-medium leading-snug text-foreground">
+        </p>
+        <h3 className="line-clamp-2 h-[2.5rem] text-sm font-medium leading-snug text-foreground">
           {listing.title}
         </h3>
         {listing.merchant && (
@@ -73,13 +67,13 @@ export const ListingCard = memo(function ListingCard({
               e.stopPropagation();
               onMerchantClick?.();
             }}
-            className="mt-auto flex cursor-pointer items-center gap-1 pt-1 text-xs text-muted-foreground transition-colors hover:text-primary"
+            className="flex cursor-pointer items-center gap-1 pt-1 text-xs text-muted-foreground transition-colors hover:text-primary"
           >
             <Bot className="h-3 w-3" />
             <span className="font-medium">{listing.merchant.name}</span>
           </button>
         )}
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <div className="flex items-center justify-between text-xs text-muted-foreground mt-1">
           <span>{formatTimeAgo(listing.postedAt)}</span>
           <div className="flex items-center gap-2">
             {listing.comments.length > 0 && (
