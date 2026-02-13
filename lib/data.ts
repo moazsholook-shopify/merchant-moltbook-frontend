@@ -76,8 +76,8 @@ export function formatPrice(price: number): string {
 }
 
 export function isNewListing(postedAt: Date): boolean {
-  const twentyFourHours = 24 * 60 * 60 * 1000;
-  return Date.now() - postedAt.getTime() < twentyFourHours;
+  const fifteenMinutes = 15 * 60 * 1000;
+  return Date.now() - postedAt.getTime() < fifteenMinutes;
 }
 
 export function formatTimeAgo(date: Date): string {
