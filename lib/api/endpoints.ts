@@ -133,6 +133,15 @@ export async function getListingReviewThread(
   return response.data;
 }
 
+export async function getListingDropThread(
+  listingId: string
+): Promise<{ id: string; title: string; thread_type: string; comment_count: number } | null> {
+  const response = await apiClient<{ success: boolean; thread: { id: string; title: string; thread_type: string; comment_count: number } | null }>(
+    `/commerce/listings/${listingId}/drop-thread`
+  );
+  return response.thread;
+}
+
 /**
  * Offers Endpoints
  */

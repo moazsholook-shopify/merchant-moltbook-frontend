@@ -52,39 +52,32 @@ export function useListingOffers(listingId: string | null): UseListingOffersRetu
 
       const offers = await getListingOffers(listingId);
 
-      // Transform offers into Negotiation[] format
-      const derivedNegotiations: Negotiation[] = offers.map((offer: ApiOfferResponse) => {
+      // Transform offers into Negotiation[] format with real messages
+      const extOffers = offers as (ApiOfferResponse & { buyer_message?: string })[];
+      const derivedNegotiations: Negotiation[] = extOffers.map((offer) => {
         const buyerName = offer.buyer_display_name || offer.buyer_name;
-        
-        // Create a message representing this offer
-        let statusText: string;
-        if (offer.status === "PROPOSED") {
-          statusText = "Made an offer (pending response)";
-        } else if (offer.status === "ACCEPTED") {
-          statusText = "Offer accepted!";
-        } else if (offer.status === "REJECTED") {
-          statusText = "Offer declined";
-        } else {
-          statusText = "Offer expired";
-        }
+        const messages: NegotiationMessage[] = [];
 
-        const messages: NegotiationMessage[] = [
-          {
-            id: offer.id,
-            senderId: offer.id,
-            senderName: buyerName,
-            text: statusText,
-            createdAt: formatActivityTime(offer.created_at),
-          }
-        ];
+        // Message 1: Buyer's actual message (or generic fallback)
+        const buyerText = offer.buyer_message && offer.buyer_message.trim().length > 0
+          ? offer.buyer_message
+          : "Made an offer on this listing";
 
-        // Add accepted/rejected timestamp if applicable
+        messages.push({
+          id: offer.id,
+          senderId: offer.id,
+          senderName: buyerName,
+          text: buyerText,
+          createdAt: formatActivityTime(offer.created_at),
+        });
+
+        // Message 2: Merchant's response (accept/reject)
         if (offer.accepted_at) {
           messages.push({
             id: `${offer.id}-accepted`,
             senderId: "merchant",
             senderName: "Seller",
-            text: "Accepted this offer",
+            text: "Offer accepted! Deal confirmed.",
             createdAt: formatActivityTime(offer.accepted_at),
           });
         } else if (offer.rejected_at) {
@@ -92,8 +85,17 @@ export function useListingOffers(listingId: string | null): UseListingOffersRetu
             id: `${offer.id}-rejected`,
             senderId: "merchant",
             senderName: "Seller",
-            text: "Declined this offer",
+            text: "Offer declined.",
             createdAt: formatActivityTime(offer.rejected_at),
+          });
+        } else {
+          // Still pending
+          messages.push({
+            id: `${offer.id}-pending`,
+            senderId: "system",
+            senderName: "System",
+            text: "Awaiting merchant response...",
+            createdAt: formatActivityTime(offer.created_at),
           });
         }
 
@@ -104,8 +106,8 @@ export function useListingOffers(listingId: string | null): UseListingOffersRetu
           buyerAvatar: "",
           merchantId: "",
           messages,
-          status: offer.status === "PROPOSED" ? "open" : "closed",
-          lastActivity: formatActivityTime(offer.created_at),
+          status: offer.status === "PROPOSED" ? "open" : (offer.status === "ACCEPTED" ? "accepted" : "declined") as "open" | "accepted" | "declined",
+          lastActivity: formatActivityTime(offer.accepted_at || offer.rejected_at || offer.created_at),
         };
       });
 

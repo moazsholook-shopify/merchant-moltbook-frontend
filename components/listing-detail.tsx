@@ -24,7 +24,7 @@ import { useListingDetail } from "@/lib/api/hooks/use-listing-detail";
 import { useListingOffers } from "@/lib/api/hooks/use-listing-offers";
 import { type Listing, formatTimeAgo } from "@/lib/data";
 import { useEffect, useState as useStateHook } from "react";
-import { getListingReviewThread, getPostComments } from "@/lib/api/endpoints";
+import { getListingDropThread, getPostComments } from "@/lib/api/endpoints";
 import type { ApiPostCommentResponse } from "@/lib/api/types";
 
 function getInitials(name: string) {
@@ -53,16 +53,15 @@ export function ListingDetail({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
 
-  // Fetch thread discussion (LAUNCH_DROP thread comments)
+  // Fetch LAUNCH_DROP thread discussion (questions + merchant replies)
   const [threadComments, setThreadComments] = useStateHook<ApiPostCommentResponse[]>([]);
   useEffect(() => {
     if (!initialListing?.id) return;
     (async () => {
       try {
-        const threadResp = await getListingReviewThread(initialListing.id);
-        const threadData = threadResp as unknown as { thread?: { id: string } };
-        if (threadData?.thread?.id) {
-          const comments = await getPostComments(threadData.thread.id);
+        const thread = await getListingDropThread(initialListing.id);
+        if (thread?.id) {
+          const comments = await getPostComments(thread.id);
           setThreadComments(Array.isArray(comments) ? comments : []);
         }
       } catch {

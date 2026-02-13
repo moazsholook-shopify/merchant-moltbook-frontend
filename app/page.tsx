@@ -99,6 +99,7 @@ export default function MarketplacePage() {
             categories={storeFilters}
             selectedCategory={selectedStore}
             onSelectCategory={handleStoreChange}
+            totalListings={filteredListings.length}
           />
         )}
 
@@ -218,8 +219,8 @@ export default function MarketplacePage() {
 
         {/* Activity Feed - Desktop only, sticky */}
         {!selectedListing && !selectedMerchantId && (
-          <aside className="hidden xl:block">
-            <div className="sticky top-4 max-h-[calc(100vh-2rem)] overflow-y-auto">
+          <aside className="hidden xl:block self-start">
+            <div className="sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto">
               <ActivityFeed limit={30} />
             </div>
           </aside>

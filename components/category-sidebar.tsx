@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react"
+import React, { useState, useMemo } from "react"
 import { cn } from "@/lib/utils";
-import { ChevronRight, Store } from "lucide-react";
+import { ChevronRight, Store, Search, X } from "lucide-react";
 
 export interface StoreFilter {
   id: string;
@@ -13,17 +13,32 @@ export function CategorySidebar({
   categories,
   selectedCategory,
   onSelectCategory,
+  totalListings,
 }: {
   categories: StoreFilter[];
   selectedCategory: string;
   onSelectCategory: (category: string) => void;
+  totalListings?: number;
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const filteredStores = useMemo(() => {
+    if (!search) return categories;
+    return categories.filter(s => s.name.toLowerCase().includes(search.toLowerCase()));
+  }, [categories, search]);
 
   return (
-    <aside className="hidden w-56 shrink-0 lg:block">
-      <div className="sticky top-20">
-        {/* All Stores — always visible */}
+    <aside className="hidden w-56 shrink-0 lg:block self-start">
+      <div className="sticky top-6 space-y-3">
+        {/* Summary */}
+        <div className="px-3">
+          <p className="text-xs text-muted-foreground">
+            {totalListings !== undefined ? `${totalListings} listings` : ""} · {categories.length} stores
+          </p>
+        </div>
+
+        {/* All Stores */}
         <button
           onClick={() => { onSelectCategory("All Stores"); setIsExpanded(false); }}
           className={cn(
@@ -36,36 +51,60 @@ export function CategorySidebar({
           All Stores
         </button>
 
-        {/* Stores dropdown toggle */}
+        {/* Browse by Store toggle */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="flex w-full items-center justify-between px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          className="flex w-full items-center justify-between px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
         >
-          <span className="flex items-center gap-2">
-            <Store className="h-4 w-4" />
+          <span className="flex items-center gap-1.5">
+            <Store className="h-3.5 w-3.5" />
             Browse by Store
           </span>
-          <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`} />
+          <ChevronRight className={`h-3.5 w-3.5 transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`} />
         </button>
 
         {/* Expandable store list */}
         {isExpanded && (
-          <nav className="ml-2 flex flex-col gap-0.5 border-l border-border pl-2">
-            {categories.map((store) => (
-              <button
-                key={store.id}
-                onClick={() => onSelectCategory(store.id)}
-                className={cn(
-                  "flex items-center gap-2 rounded-md px-3 py-1.5 text-sm transition-colors text-left",
-                  selectedCategory === store.id
-                    ? "bg-primary/10 text-primary font-medium"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+          <div className="space-y-1">
+            {/* Search within stores */}
+            {categories.length > 6 && (
+              <div className="relative px-2">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Filter stores..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  className="w-full rounded-md border border-border bg-background py-1 pl-7 pr-6 text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                />
+                {search && (
+                  <button onClick={() => setSearch("")} className="absolute right-4 top-1/2 -translate-y-1/2">
+                    <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                  </button>
                 )}
-              >
-                <span className="truncate">{store.name}</span>
-              </button>
-            ))}
-          </nav>
+              </div>
+            )}
+
+            <nav className="ml-3 flex flex-col gap-0.5 border-l border-border pl-2 max-h-60 overflow-y-auto">
+              {filteredStores.map((store) => (
+                <button
+                  key={store.id}
+                  onClick={() => onSelectCategory(store.id)}
+                  className={cn(
+                    "flex items-center rounded-md px-2 py-1.5 text-xs transition-colors text-left",
+                    selectedCategory === store.id
+                      ? "bg-primary/10 text-primary font-medium"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                  )}
+                >
+                  <span className="truncate">{store.name}</span>
+                </button>
+              ))}
+              {filteredStores.length === 0 && (
+                <p className="px-2 py-1.5 text-xs text-muted-foreground">No stores match</p>
+              )}
+            </nav>
+          </div>
         )}
       </div>
     </aside>
