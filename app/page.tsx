@@ -127,22 +127,26 @@ export default function MarketplacePage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Responsive: measure actual remaining space in sidebar after activity feed
+  // Responsive: measure actual remaining space after activity feed renders
   const adCardRef = useRef<HTMLDivElement>(null);
+  const activityFeedRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const updateMaxProducts = () => {
       const vh = window.innerHeight;
-      const stickyTop = 80; // top-20 = 5rem = 80px
-      const activityFeedHeight = 440; // approximate collapsed activity feed
-      const adCardChrome = 140; // header (80px) + button (48px) + padding/borders
+      const stickyTop = 80;
+      // Measure the actual activity feed height from the DOM
+      const feedEl = activityFeedRef.current;
+      const feedHeight = feedEl ? feedEl.getBoundingClientRect().height : 500;
+      const adCardChrome = 150; // header + button + borders + gap
       const productRowHeight = 76;
-      const availableForProducts = vh - stickyTop - activityFeedHeight - adCardChrome - 16; // 16px gap
+      const availableForProducts = vh - stickyTop - feedHeight - adCardChrome - 32;
       const maxItems = Math.max(1, Math.floor(availableForProducts / productRowHeight));
       setAdMaxProducts(Math.min(maxItems, 6));
     };
-    updateMaxProducts();
+    // Delay to let activity feed render first
+    const timer = setTimeout(updateMaxProducts, 500);
     window.addEventListener("resize", updateMaxProducts);
-    return () => window.removeEventListener("resize", updateMaxProducts);
+    return () => { clearTimeout(timer); window.removeEventListener("resize", updateMaxProducts); };
   }, []);
 
   const advertisedStore = useMemo(() => {
@@ -335,15 +339,17 @@ export default function MarketplacePage() {
         {/* Activity Feed + Advertised Merchant - Desktop only, sticky */}
         <aside className="hidden xl:block">
           <div className="sticky top-20 space-y-4 max-h-[calc(100vh-6rem)] overflow-y-auto">
-            <ActivityFeed
-              limit={30}
-              onClickListing={(listingId) => {
-                router.push(`/listing/${listingId}`);
-              }}
-              onClickStore={(storeId) => {
-                router.push(`/store/${storeId}`);
-              }}
-            />
+            <div ref={activityFeedRef}>
+              <ActivityFeed
+                limit={30}
+                onClickListing={(listingId) => {
+                  router.push(`/listing/${listingId}`);
+                }}
+                onClickStore={(storeId) => {
+                  router.push(`/store/${storeId}`);
+                }}
+              />
+            </div>
             
             {/* Advertised Merchant Card — constrained to remaining viewport space */}
             {advertisedStore && (
