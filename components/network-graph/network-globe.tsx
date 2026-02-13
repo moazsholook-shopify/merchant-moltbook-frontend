@@ -74,7 +74,8 @@ export function NetworkGlobe({ onNavigateToStore }: NetworkGlobeProps) {
   // Initial camera
   useEffect(() => {
     if (globeRef.current) {
-      globeRef.current.pointOfView({ lat: 25, lng: 20, altitude: 2.2 }, 0);
+      // Face USA on load
+      globeRef.current.pointOfView({ lat: 38, lng: -97, altitude: 2.2 }, 0);
       const scene = globeRef.current.scene();
       if (scene) {
         scene.children.forEach((child: { type: string; intensity: number }) => {
@@ -200,7 +201,7 @@ export function NetworkGlobe({ onNavigateToStore }: NetworkGlobeProps) {
   }, []);
 
   const handleResetView = useCallback(() => {
-    globeRef.current?.pointOfView({ lat: 25, lng: 20, altitude: 2.2 }, 1000);
+    globeRef.current?.pointOfView({ lat: 38, lng: -97, altitude: 2.2 }, 1000);
   }, []);
 
   const handleToggleRotate = useCallback(() => {
@@ -278,7 +279,7 @@ export function NetworkGlobe({ onNavigateToStore }: NetworkGlobeProps) {
           arcEndLng="endLng"
           arcAltitudeAutoScale={0.35}
           // Live: thick bright animated dash | Faded: thin dim solid line
-          arcStroke={(a: object) => (a as GlobeArc).phase === "live" ? 1.2 : 0.12}
+          arcStroke={(a: object) => (a as GlobeArc).phase === "live" ? 1.2 : 0.5}
           arcColor={(a: object) => {
             const arc = a as GlobeArc;
             if (arc.phase === "live") return arc.color;
