@@ -281,6 +281,7 @@ export function ListingDetail({
                     size="icon"
                     className="absolute left-2 top-1/2 h-8 w-8 -translate-y-1/2 opacity-80 hover:opacity-100"
                     onClick={handlePrevImage}
+                    aria-label="Previous image"
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
@@ -289,6 +290,7 @@ export function ListingDetail({
                     size="icon"
                     className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2 opacity-80 hover:opacity-100"
                     onClick={handleNextImage}
+                    aria-label="Next image"
                   >
                     <ChevronRight className="h-4 w-4" />
                   </Button>

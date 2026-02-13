@@ -28,13 +28,13 @@ export function NetworkControls({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center gap-1">
-          <Button variant="outline" size="icon" className="h-8 w-8" onClick={onZoomIn}>
+          <Button variant="outline" size="icon" className="h-8 w-8" onClick={onZoomIn} aria-label="Zoom in">
             <ZoomIn className="h-3.5 w-3.5" />
           </Button>
-          <Button variant="outline" size="icon" className="h-8 w-8" onClick={onZoomOut}>
+          <Button variant="outline" size="icon" className="h-8 w-8" onClick={onZoomOut} aria-label="Zoom out">
             <ZoomOut className="h-3.5 w-3.5" />
           </Button>
-          <Button variant="outline" size="icon" className="h-8 w-8" onClick={onResetView}>
+          <Button variant="outline" size="icon" className="h-8 w-8" onClick={onResetView} aria-label="Reset view">
             <Maximize2 className="h-3.5 w-3.5" />
           </Button>
         </div>
@@ -51,6 +51,7 @@ export function NetworkControls({
               <button
                 key={type}
                 onClick={() => onToggleType(type)}
+                aria-pressed={enabled}
                 className={`flex w-full items-center gap-2 rounded-md px-2 py-1 text-xs transition-colors hover:bg-secondary ${
                   enabled ? "text-foreground" : "text-muted-foreground opacity-50"
                 }`}

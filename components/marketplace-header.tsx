@@ -24,7 +24,7 @@ function ThemeToggle() {
     <button
       onClick={toggle}
       className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-secondary text-muted-foreground transition-colors hover:text-foreground hover:bg-secondary/80"
-      aria-label="Toggle theme"
+      aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}
     >
       {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
     </button>
